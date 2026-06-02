@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --color-paper: #f4ede0;
+  --color-paper-2: #efe6d4;
+  --color-ink: #1b1714;
+  --color-ink-soft: #4a423a;
+  --color-coral: #f0502e;
+  --color-cobalt: #1f3df0;
+  --color-line: #d8ccb6;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-paper);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 18% 20%, rgba(240, 80, 46, 0.07), transparent 45%),
+    radial-gradient(circle at 82% 78%, rgba(31, 61, 240, 0.06), transparent 45%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background-color: var(--color-coral);
+  color: var(--color-paper);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .rise {
+    animation: none;
+  }
+}
+
+.link-grow {
+  position: relative;
+}
+
+.link-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 100%;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.link-grow:hover::after {
+  transform: scaleX(1);
+}

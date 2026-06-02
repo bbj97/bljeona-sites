@@ -1,0 +1,42 @@
+<section aria-labelledby="tokens-title">
+  <div class="section-head section-head-tight">
+    <h2 id="tokens-title">Tokens</h2>
+    <span class="hint"
+      >Export the full palette in the format your project needs.</span
+    >
+  </div>
+  <div class="tabs" id="formatTabs" role="tablist" aria-label="Export format">
+    <button
+      type="button"
+      class="tab active"
+      data-fmt="v4"
+      role="tab"
+      aria-selected="true">Tailwind v4 · @theme</button
+    >
+    <button
+      type="button"
+      class="tab"
+      data-fmt="v3"
+      role="tab"
+      aria-selected="false">Tailwind v3 · config</button
+    >
+    <button
+      type="button"
+      class="tab"
+      data-fmt="css"
+      role="tab"
+      aria-selected="false">CSS variables</button
+    >
+    <button
+      type="button"
+      class="tab"
+      data-fmt="hexlist"
+      role="tab"
+      aria-selected="false">Plain hex</button
+    >
+  </div>
+  <div class="codewrap">
+    <button class="copyall" id="copyAll" type="button">Copy tokens</button>
+    <pre id="code" tabindex="0" aria-live="polite"></pre>
+  </div>
+</section>

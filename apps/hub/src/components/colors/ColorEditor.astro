@@ -1,0 +1,51 @@
+<div class="colorbar" id="colorbar" aria-label="Palette colors"></div>
+<div class="editor" aria-label="Edit selected color">
+  <div class="hexfield">
+    <label class="sr-only" for="picker">Color picker</label>
+    <div class="hexgroup" id="hexGroup">
+      <input type="color" id="picker" class="swatch-input" value="#ef6351" />
+      <label class="sr-only" for="hex">Hex color</label>
+      <input
+        type="text"
+        id="hex"
+        class="hexin"
+        value="#EF6351"
+        maxlength="7"
+        spellcheck="false"
+        inputmode="text"
+        autocomplete="off"
+        aria-describedby="hexStatus"
+      />
+    </div>
+    <div class="field-status" id="hexStatus" aria-live="polite"></div>
+  </div>
+  <div class="fieldwrap">
+    <label for="name">Key</label>
+    <input
+      id="name"
+      class="namein"
+      type="text"
+      value="brand"
+      spellcheck="false"
+      autocomplete="off"
+    />
+  </div>
+  <div class="spacer"></div>
+  <div class="right">
+    <button class="btn" id="randomBtn" type="button">Random</button>
+    <button
+      class="btn"
+      id="anchorBtn"
+      type="button"
+      title="Snap this scale so the exact color lands on its closest stop"
+      >Anchor color</button
+    >
+    <button
+      class="icon-btn"
+      id="removeBtn"
+      type="button"
+      title="Remove this color"
+      aria-label="Remove selected color">&minus;</button
+    >
+  </div>
+</div>

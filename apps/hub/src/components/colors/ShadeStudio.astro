@@ -1,0 +1,1337 @@
+---
+import ColorEditor from "./ColorEditor.astro";
+import ColorHubIntro from "./ColorHubIntro.astro";
+import ColorMiniTools from "./ColorMiniTools.astro";
+import ColorScaleSection from "./ColorScaleSection.astro";
+import ColorTokenExport from "./ColorTokenExport.astro";
+import ContrastChecker from "./ContrastChecker.astro";
+---
+
+<div class="colors-studio" data-colors-hub>
+  <ColorHubIntro />
+  <ColorEditor />
+  <ColorScaleSection />
+  <ColorMiniTools />
+  <ColorTokenExport />
+  <ContrastChecker />
+  <footer class="studio-foot">
+    <span>OKLCH generation · gamut-clamped to sRGB · WCAG 2.1 contrast</span>
+    <span>Runs entirely in your browser. No network. Nothing stored.</span>
+  </footer>
+</div>
+<div class="toast" id="toast" aria-live="polite">Copied</div>
+
+<style is:global>
+  .colors-studio {
+    --paper: var(--color-paper, #f7f3ea);
+    --paper-2: var(--color-paper-2, #f1ebdd);
+    --panel: var(--color-panel, #fbf8f2);
+    --ink: var(--color-ink, #1c1815);
+    --ink-soft: var(--color-ink-soft, #5a5047);
+    --line: var(--color-line, #ddd2be);
+    --line-2: #c9bfac;
+    --accent: #b5462f;
+    --radius: 14px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 30px 22px 64px;
+    font-family: var(--font-body);
+    background: radial-gradient(
+      900px 480px at 92% -12%,
+      rgba(181, 70, 47, 0.07),
+      transparent 60%
+    );
+    color: var(--ink);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .colors-studio *,
+  .colors-studio *::before,
+  .colors-studio *::after {
+    box-sizing: border-box;
+  }
+  .colors-studio button,
+  .colors-studio input,
+  .colors-studio select {
+    font: inherit;
+  }
+  .colors-studio button {
+    appearance: none;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .colors-studio :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 22px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+  }
+  .brandmark {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(25px, 4vw, 31px);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .brandmark em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .tagline {
+    font-size: 13px;
+    color: var(--ink-soft);
+    max-width: 420px;
+    margin: 8px 0 0;
+  }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .presets {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .p-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-right: 2px;
+  }
+  .dot {
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    background: var(--preset);
+    cursor: pointer;
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+  .dot:hover {
+    transform: translateY(-1px) scale(1.08);
+    box-shadow: 0 5px 14px rgba(28, 24, 21, 0.12);
+  }
+  .btn {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid var(--line-2);
+    background: #fff;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    color: var(--ink);
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease,
+      background 0.15s ease,
+      transform 0.15s ease;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn.on {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .colorbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 22px;
+  }
+  .ctab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 39px;
+    padding: 0 13px 0 11px;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 11px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    transition:
+      border-color 0.14s ease,
+      box-shadow 0.14s ease,
+      color 0.14s ease,
+      transform 0.14s ease;
+  }
+  .ctab:hover {
+    border-color: var(--line-2);
+    transform: translateY(-1px);
+  }
+  .ctab.active {
+    border-color: var(--ink);
+    color: var(--ink);
+    box-shadow: 0 0 0 2px rgba(28, 26, 23, 0.07);
+  }
+  .ctab .chip {
+    width: 15px;
+    height: 15px;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    flex: none;
+  }
+  .ctab.add {
+    color: var(--ink-soft);
+    font-size: 15px;
+    padding: 0 15px;
+    justify-content: center;
+  }
+  .editor {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    margin-top: 14px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.78);
+    border-radius: 13px;
+    padding: 12px 13px;
+    box-shadow: 0 10px 30px rgba(28, 24, 21, 0.03);
+  }
+  .hexfield {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .hexgroup {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .hexgroup.invalid {
+    border-color: #a43d2e;
+    box-shadow: 0 0 0 2px rgba(164, 61, 46, 0.08);
+  }
+  .swatch-input {
+    width: 44px;
+    height: 40px;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+  }
+  .swatch-input::-webkit-color-swatch-wrapper {
+    padding: 4px;
+  }
+  .swatch-input::-webkit-color-swatch {
+    border: 0;
+    border-radius: 7px;
+  }
+  .hexin {
+    border: 0;
+    outline: 0;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    width: 102px;
+    padding: 0 10px;
+    height: 40px;
+    background: transparent;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .field-status {
+    min-height: 14px;
+    font-size: 11px;
+    color: #8f3529;
+  }
+  .fieldwrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+  }
+  .fieldwrap label,
+  .ck-row label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .namein {
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    height: 40px;
+    padding: 0 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    outline: 0;
+    background: #fff;
+    color: var(--ink);
+    width: 136px;
+  }
+  .hexgroup:focus-within,
+  .namein:focus {
+    border-color: var(--accent);
+  }
+  .editor .spacer {
+    flex: 1;
+  }
+  .editor .right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-top: 1px;
+  }
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line-2);
+    background: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-size: 17px;
+    line-height: 1;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .icon-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .icon-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 34px 0 12px;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .section-head-tight {
+    margin-bottom: 0;
+  }
+  .section-head h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 19px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .section-head .hint {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    max-width: 430px;
+  }
+  .scale {
+    display: flex;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 12px 34px rgba(28, 24, 21, 0.035);
+  }
+  .stop {
+    flex: 1 1 0;
+    min-width: 0;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 112px;
+    padding: 9px 8px;
+    border: 0;
+    border-radius: 0;
+    text-align: left;
+    transition:
+      filter 0.12s ease,
+      transform 0.12s ease;
+  }
+  .stop:hover {
+    filter: brightness(0.96);
+  }
+  .stop .lvl {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .stop .meta {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    line-height: 1.5;
+    opacity: 0.92;
+    white-space: nowrap;
+  }
+  .stop .badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.03em;
+    padding: 1px 5px;
+    border-radius: 5px;
+    border: 1px solid currentColor;
+    opacity: 0.82;
+  }
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .mini-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.78);
+    padding: 16px;
+    min-width: 0;
+    box-shadow: 0 10px 28px rgba(28, 24, 21, 0.03);
+  }
+  .mini-card-head h3 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    line-height: 1.1;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .mini-card-head p {
+    color: var(--ink-soft);
+    font-size: 12px;
+    margin: 6px 0 14px;
+  }
+  .copy-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    padding: 9px 10px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .copy-row + .copy-row {
+    margin-top: 7px;
+  }
+  .copy-row span:first-child {
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .copy-row span:last-child {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pair-list {
+    display: grid;
+    gap: 8px;
+  }
+  .pair-card {
+    border: 1px solid rgba(0, 0, 0, 0.09);
+    border-radius: 11px;
+    min-height: 54px;
+    padding: 10px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .pair-card strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 1.1;
+  }
+  .pair-card span {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    opacity: 0.82;
+  }
+  .empty-state {
+    border: 1px dashed var(--line-2);
+    border-radius: 11px;
+    padding: 13px;
+    color: var(--ink-soft);
+    font-size: 12px;
+  }
+  .gradient-preview {
+    min-height: 78px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin-bottom: 12px;
+  }
+  .gradient-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .gradient-code {
+    margin-top: 10px;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mini-action {
+    margin-top: 10px;
+  }
+  .tabs {
+    display: flex;
+    gap: 5px;
+    margin: 12px 0 0;
+    flex-wrap: wrap;
+  }
+  .tab {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    padding: 9px 13px;
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+    background: var(--paper-2);
+    cursor: pointer;
+    color: var(--ink-soft);
+    min-height: 38px;
+  }
+  .tab.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .codewrap {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: 0 var(--radius) var(--radius) var(--radius);
+    overflow: hidden;
+    background: #161310;
+    box-shadow: 0 12px 34px rgba(28, 24, 21, 0.035);
+  }
+  pre {
+    margin: 0;
+    padding: 18px;
+    overflow: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: #e9e2d4;
+    max-height: 312px;
+  }
+  .copyall {
+    position: absolute;
+    top: 11px;
+    right: 11px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 12px;
+    border: 1px solid #443e34;
+    background: #221e19;
+    color: #e9e2d4;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .copyall:hover {
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .tok-key {
+    color: #e0a86b;
+  }
+  .tok-val {
+    color: #9fc7a6;
+  }
+  .tok-cmt {
+    color: #6f675a;
+    font-style: italic;
+  }
+  .tok-sel {
+    color: #c98a7d;
+  }
+  .checker {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 20px;
+    margin-top: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.78);
+    padding: 20px;
+    box-shadow: 0 12px 34px rgba(28, 24, 21, 0.035);
+  }
+  .preview {
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 9px;
+    min-height: 170px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .preview .big {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 5vw, 34px);
+    font-weight: 600;
+    line-height: 1.05;
+  }
+  .preview .small {
+    font-size: 13px;
+    opacity: 0.95;
+  }
+  .ck-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .ck-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .colors-studio select {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 9px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+  }
+  .colors-studio select:focus {
+    outline: 0;
+    border-color: var(--accent);
+  }
+  .swap {
+    align-self: flex-start;
+  }
+  .ratio {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .ratio small {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    margin-left: 4px;
+  }
+  .grades {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-top: 5px;
+  }
+  .grade {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    padding: 5px 9px;
+    border-radius: 8px;
+    border: 1px solid var(--line-2);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .grade b {
+    font-weight: 500;
+  }
+  .pass {
+    color: #1f6b3a;
+    border-color: #bcdcc4;
+    background: #eef7f0;
+  }
+  .fail {
+    color: #9a3322;
+    border-color: #e6c4bc;
+    background: #faeeea;
+  }
+  .studio-foot {
+    margin-top: 40px;
+    border-top: 1px solid var(--line);
+    padding-top: 15px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--color-ink, #1c1815);
+    color: var(--color-paper, #f7f3ea);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+    z-index: 50;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  @media (max-width: 860px) {
+    .mini-grid {
+      grid-template-columns: 1fr;
+    }
+    .checker {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 720px) {
+    .colors-studio {
+      padding: 24px 16px 52px;
+    }
+    .top {
+      align-items: flex-start;
+    }
+    .presets {
+      width: 100%;
+    }
+    .colorbar {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+    .ctab {
+      flex: 0 0 auto;
+    }
+    .editor {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .hexgroup,
+    .hexfield,
+    .fieldwrap,
+    .namein {
+      width: 100%;
+    }
+    .hexin {
+      width: 100%;
+    }
+    .fieldwrap {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .editor .right {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr 38px;
+    }
+    .btn,
+    .icon-btn {
+      width: 100%;
+    }
+    .scale {
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+    .stop {
+      flex: 0 0 58px;
+    }
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .codewrap {
+      border-radius: var(--radius);
+    }
+    .copyall {
+      position: static;
+      margin: 12px 12px 0 auto;
+      display: block;
+    }
+    pre {
+      padding-top: 14px;
+      max-height: 280px;
+    }
+    .checker {
+      padding: 15px;
+    }
+    .preview {
+      padding: 20px;
+    }
+    .gradient-controls {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 420px) {
+    .editor .right {
+      grid-template-columns: 1fr;
+    }
+    .icon-btn {
+      width: 100%;
+    }
+    .tabs {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .colors-studio *,
+    .toast {
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+
+<script>
+  import {
+    buildScale,
+    contrast,
+    bestText,
+    normalizeHex,
+    randomHex,
+    type Stop,
+  } from "./lib/colors";
+  import {
+    toTailwindV4,
+    toTailwindV3,
+    toCss,
+    toHexList,
+    type Tokens,
+  } from "./lib/format";
+
+  type Swatch = { id: number; name: string; hex: string };
+  type ScaleStop = Stop & { stop: string | number; hex: string };
+  type Format = "v4" | "v3" | "css" | "hexlist";
+  type Pair = { fg: ScaleStop; bg: ScaleStop; ratio: number };
+  const root = document.querySelector("[data-colors-hub]") as HTMLElement;
+  const toast = document.getElementById("toast") as HTMLElement;
+  const $ = (id: string) => root.querySelector(`#${id}`) as any;
+  const $$ = <T extends HTMLElement = HTMLElement>(selector: string) =>
+    Array.from(root.querySelectorAll(selector)) as T[];
+  const cleanName = (value: string) =>
+    (value || "")
+      .trim()
+      .replace(/[^a-z0-9-]/gi, "")
+      .toLowerCase() || "brand";
+  const escapeHtml = (value: string) =>
+    value.replace(
+      /[&<>"']/g,
+      (char) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        })[char] || char,
+    );
+  const labelForText = (hex: string) =>
+    hex.toUpperCase() === "#000000" ? "black" : "white";
+
+  let anchor = false;
+  let fmt: Format = "v4";
+  let uid = 0;
+  let palette: Swatch[] = [{ id: ++uid, name: "brand", hex: "#EF6351" }];
+  let activeId = palette[0].id;
+  let scales: Record<number, ScaleStop[]> = {};
+  let toastTimer: number | undefined;
+
+  const active = () =>
+    palette.find((item) => item.id === activeId) || palette[0];
+  const HL: Tokens = {
+    key: (value) => `<span class="tok-key">${value}</span>`,
+    val: (value) => `<span class="tok-val">${value}</span>`,
+    sel: (value) => `<span class="tok-sel">${value}</span>`,
+    cmt: (value) => `<span class="tok-cmt">${value}</span>`,
+  };
+
+  function hexToRgb(hex: string) {
+    const normalized = hex.replace("#", "");
+    const value = parseInt(normalized, 16);
+    return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 };
+  }
+
+  function rgbToHsl(hex: string) {
+    const { r, g, b } = hexToRgb(hex);
+    const rp = r / 255;
+    const gp = g / 255;
+    const bp = b / 255;
+    const max = Math.max(rp, gp, bp);
+    const min = Math.min(rp, gp, bp);
+    const lightness = (max + min) / 2;
+    const diff = max - min;
+    let hue = 0;
+    let saturation = 0;
+    if (diff) {
+      saturation =
+        lightness > 0.5 ? diff / (2 - max - min) : diff / (max + min);
+      if (max === rp) hue = (gp - bp) / diff + (gp < bp ? 6 : 0);
+      if (max === gp) hue = (bp - rp) / diff + 2;
+      if (max === bp) hue = (rp - gp) / diff + 4;
+      hue *= 60;
+    }
+    return {
+      h: Math.round(hue),
+      s: Math.round(saturation * 100),
+      l: Math.round(lightness * 100),
+    };
+  }
+
+  function relativeLuminance(hex: string) {
+    const { r, g, b } = hexToRgb(hex);
+    const linear = [r, g, b].map((channel) => {
+      const value = channel / 255;
+      return value <= 0.03928
+        ? value / 12.92
+        : Math.pow((value + 0.055) / 1.055, 2.4);
+    });
+    return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+  }
+
+  function setStatus(message: string, invalid = false) {
+    $("hexStatus").textContent = message;
+    $("hexGroup").classList.toggle("invalid", invalid);
+    $("hex").setAttribute("aria-invalid", invalid ? "true" : "false");
+  }
+
+  function showToast(message: string) {
+    toast.textContent = message;
+    toast.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1400);
+  }
+
+  function fallbackCopy(text: string, message: string) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    showToast(copied ? message : "Copy failed");
+  }
+
+  function copy(text: string, message = "Copied") {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => showToast(message))
+        .catch(() => fallbackCopy(text, message));
+      return;
+    }
+    fallbackCopy(text, message);
+  }
+
+  function renderColorTabs() {
+    const colorbar = $("colorbar");
+    colorbar.innerHTML =
+      palette
+        .map((item) => {
+          const selected = item.id === activeId;
+          const label = cleanName(item.name);
+          return `<button type="button" class="ctab ${selected ? "active" : ""}" data-id="${item.id}" aria-pressed="${selected}" aria-label="Edit ${escapeHtml(label)} color"><span class="chip" style="background:${item.hex}"></span>${escapeHtml(label)}</button>`;
+        })
+        .join("") +
+      `<button type="button" class="ctab add" id="addTab" title="Add a color" aria-label="Add a color">+</button>`;
+  }
+
+  function syncEditor() {
+    const item = active();
+    $("picker").value = item.hex;
+    $("hex").value = item.hex.toUpperCase();
+    $("name").value = item.name;
+    $("removeBtn").toggleAttribute("disabled", palette.length <= 1);
+    $("anchorBtn").classList.toggle("on", anchor);
+    $("anchorBtn").textContent = anchor ? "Anchored" : "Anchor color";
+    setStatus("");
+  }
+
+  function renderScale() {
+    scales = {};
+    palette.forEach((item) => {
+      scales[item.id] = buildScale(item.hex, anchor) as ScaleStop[];
+    });
+    const list = scales[activeId] || [];
+    const scale = $("scale");
+    scale.innerHTML = "";
+    list.forEach((stop) => {
+      const text = bestText(stop.hex);
+      const ratio = contrast(stop.hex, text);
+      const grade = ratio >= 4.5 ? "AA" : ratio >= 3 ? "AA lg" : "fail";
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "stop";
+      button.style.background = stop.hex;
+      button.style.color = text;
+      button.title = `Copy ${stop.hex}`;
+      button.setAttribute(
+        "aria-label",
+        `Copy ${cleanName(active().name)} ${stop.stop}, ${stop.hex}, contrast ${ratio.toFixed(2)} to 1`,
+      );
+      button.innerHTML = `<div class="lvl">${stop.stop}</div><div class="meta">${stop.hex}<br><span style="opacity:.75">${ratio.toFixed(2)}:1</span> <span class="badge">${grade}</span></div>`;
+      button.addEventListener("click", () =>
+        copy(stop.hex, `${stop.hex} copied`),
+      );
+      scale.appendChild(button);
+    });
+  }
+
+  function buildCode(highlight: boolean) {
+    const named = palette.map((item) => ({
+      name: cleanName(item.name),
+      stops: scales[item.id],
+    }));
+    const tokens = highlight ? HL : undefined;
+    if (fmt === "v4") return toTailwindV4(named, tokens);
+    if (fmt === "v3") return toTailwindV3(named, tokens);
+    if (fmt === "css") return toCss(named, tokens);
+    return toHexList(named, tokens);
+  }
+
+  function renderCode() {
+    $("code").innerHTML = buildCode(true);
+  }
+
+  function optionList() {
+    const options = [
+      { v: "#FFFFFF", t: "white" },
+      { v: "#000000", t: "black" },
+    ];
+    palette.forEach((item) => {
+      const name = cleanName(item.name);
+      scales[item.id].forEach((stop) =>
+        options.push({ v: stop.hex, t: `${name}-${stop.stop}  ${stop.hex}` }),
+      );
+    });
+    return options;
+  }
+
+  function setSelectOptions(
+    select: HTMLSelectElement,
+    options: { v: string; t: string }[],
+    fallback?: string,
+  ) {
+    const previous = select.value;
+    select.innerHTML = "";
+    options.forEach((item) => select.add(new Option(item.t, item.v)));
+    if (previous && options.some((item) => item.v === previous))
+      select.value = previous;
+    else if (fallback) select.value = fallback;
+  }
+
+  function renderSelectors() {
+    const options = optionList();
+    const activeScale = scales[activeId] || [];
+    setSelectOptions($("fg"), options, activeScale[8]?.hex || "#000000");
+    setSelectOptions($("bg"), options, activeScale[0]?.hex || "#FFFFFF");
+  }
+
+  function pill(label: string, ok: boolean) {
+    return `<span class="grade ${ok ? "pass" : "fail"}"><b>${label}</b> ${ok ? "pass" : "fail"}</span>`;
+  }
+
+  function updateContrast() {
+    const fg = $("fg").value;
+    const bg = $("bg").value;
+    const ratio = contrast(fg, bg);
+    const preview = $("preview");
+    preview.style.background = bg;
+    preview.style.color = fg;
+    $("ratio").innerHTML = `${ratio.toFixed(2)}<small>: 1</small>`;
+    $("grades").innerHTML =
+      pill("AA normal", ratio >= 4.5) +
+      pill("AA large", ratio >= 3) +
+      pill("AAA normal", ratio >= 7) +
+      pill("AAA large", ratio >= 4.5);
+  }
+
+  function renderInspector() {
+    const item = active();
+    const rgb = hexToRgb(item.hex);
+    const hsl = rgbToHsl(item.hex);
+    const text = bestText(item.hex);
+    const rows = [
+      ["Hex", item.hex.toUpperCase()],
+      ["RGB", `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`],
+      ["HSL", `hsl(${hsl.h} ${hsl.s}% ${hsl.l}%)`],
+      ["Text", `${labelForText(text)} · ${text}`],
+      ["Luma", relativeLuminance(item.hex).toFixed(3)],
+    ];
+    $("inspectorValues").innerHTML = rows
+      .map(
+        ([label, value]) =>
+          `<button type="button" class="copy-row" data-copy="${escapeHtml(value)}" aria-label="Copy ${escapeHtml(label)} value"><span>${escapeHtml(label)}</span><span>${escapeHtml(value)}</span></button>`,
+      )
+      .join("");
+  }
+
+  function suggestedPairs() {
+    const list = scales[activeId] || [];
+    const preferred = [
+      [list[9], list[0]],
+      [list[8], list[1]],
+      [list[7], list[2]],
+      [list[1], list[8]],
+      [list[2], list[9]],
+    ].filter(([fg, bg]) => fg && bg) as ScaleStop[][];
+    const pairs = preferred
+      .map(([fg, bg]) => ({ fg, bg, ratio: contrast(fg.hex, bg.hex) }))
+      .filter((item) => item.ratio >= 4.5);
+    if (pairs.length >= 3) return pairs.slice(0, 4);
+    const all: Pair[] = [];
+    list.forEach((fg) => {
+      list.forEach((bg) => {
+        if (fg.hex === bg.hex) return;
+        const ratio = contrast(fg.hex, bg.hex);
+        if (ratio >= 4.5) all.push({ fg, bg, ratio });
+      });
+    });
+    return all.sort((a, b) => b.ratio - a.ratio).slice(0, 4);
+  }
+
+  function renderPairs() {
+    const pairs = suggestedPairs();
+    const pairList = $("pairList");
+    if (!pairs.length) {
+      pairList.innerHTML = `<div class="empty-state">No AA pairs found in this scale. Try anchoring or choosing a color with a wider light-to-dark range.</div>`;
+      return;
+    }
+    pairList.innerHTML = pairs
+      .map((pair) => {
+        const css = `color: ${pair.fg.hex}; background: ${pair.bg.hex};`;
+        return `<button type="button" class="pair-card" style="${css}" data-copy="${css}" aria-label="Copy accessible pair ${pair.fg.hex} on ${pair.bg.hex}"><strong>Aa sample</strong><span>${pair.fg.stop} on ${pair.bg.stop} · ${pair.ratio.toFixed(2)}:1</span></button>`;
+      })
+      .join("");
+  }
+
+  function renderGradientOptions() {
+    const activeScale = scales[activeId] || [];
+    const options = activeScale.map((stop) => ({
+      v: stop.hex,
+      t: `${stop.stop}  ${stop.hex}`,
+    }));
+    setSelectOptions(
+      $("gradientStart"),
+      options,
+      activeScale[1]?.hex || activeScale[0]?.hex,
+    );
+    setSelectOptions(
+      $("gradientEnd"),
+      options,
+      activeScale[7]?.hex || activeScale[activeScale.length - 1]?.hex,
+    );
+  }
+
+  function updateGradient() {
+    const start = $("gradientStart").value;
+    const end = $("gradientEnd").value;
+    const css = `linear-gradient(135deg, ${start}, ${end})`;
+    $("gradientPreview").style.background = css;
+    $("gradientCode").textContent = `background: ${css};`;
+  }
+
+  function refresh() {
+    renderColorTabs();
+    renderScale();
+    renderCode();
+    renderSelectors();
+    renderInspector();
+    renderPairs();
+    renderGradientOptions();
+    updateContrast();
+    updateGradient();
+  }
+
+  function render() {
+    refresh();
+    syncEditor();
+  }
+
+  // Before: ("click", (event) => {
+  $("colorbar").addEventListener("click", (event: Event) => {
+    const tab = (event.target as HTMLElement).closest<HTMLButtonElement>(
+      ".ctab",
+    );
+    if (!tab) return;
+    if (tab.id === "addTab") {
+      const item = {
+        id: ++uid,
+        name: `color-${palette.length}`,
+        hex: randomHex(),
+      };
+      palette = [...palette, item];
+      activeId = item.id;
+      render();
+      return;
+    }
+    activeId = Number(tab.dataset.id);
+    render();
+  });
+
+  $("hex").addEventListener("input", (event: Event) => {
+    const value = (event.target as HTMLInputElement).value;
+    const normalized = normalizeHex(value);
+    if (normalized) {
+      active().hex = normalized;
+      $("picker").value = normalized;
+      setStatus("");
+      refresh();
+      return;
+    }
+    setStatus(
+      value.trim() ? "Use a valid hex color, like #EF6351." : "",
+      !!value.trim(),
+    );
+  });
+
+  $("picker").addEventListener("input", (event: Event) => {
+    active().hex = (event.target as HTMLInputElement).value.toUpperCase();
+    $("hex").value = active().hex;
+    setStatus("");
+    refresh();
+  });
+
+  $("name").addEventListener("input", (event: Event) => {
+    active().name = (event.target as HTMLInputElement).value;
+    renderColorTabs();
+    renderCode();
+    renderSelectors();
+    renderInspector();
+  });
+
+  $("randomBtn").addEventListener("click", () => {
+    active().hex = randomHex();
+    render();
+  });
+
+  $("anchorBtn").addEventListener("click", () => {
+    anchor = !anchor;
+    render();
+  });
+
+  $("removeBtn").addEventListener("click", () => {
+    if (palette.length <= 1) return;
+    const index = palette.findIndex((item) => item.id === activeId);
+    palette = palette.filter((item) => item.id !== activeId);
+    activeId = palette[Math.max(0, index - 1)].id;
+    render();
+  });
+
+  $$(".dot").forEach((dot) => {
+    dot.addEventListener("click", () => {
+      const hex = dot.dataset.hex;
+      if (!hex) return;
+      active().hex = hex.toUpperCase();
+      render();
+    });
+  });
+
+  $$(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      $$(".tab").forEach((item) => {
+        item.classList.remove("active");
+        item.setAttribute("aria-selected", "false");
+      });
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected", "true");
+      fmt = tab.dataset.fmt as Format;
+      renderCode();
+    });
+  });
+
+  $("copyAll").addEventListener("click", () =>
+    copy(buildCode(false), "Tokens copied"),
+  );
+
+  $("swapBtn").addEventListener("click", () => {
+    const fg = $("fg").value;
+    $("fg").value = $("bg").value;
+    $("bg").value = fg;
+    updateContrast();
+  });
+
+  $("fg").addEventListener("change", updateContrast);
+  $("bg").addEventListener("change", updateContrast);
+  $("gradientStart").addEventListener("change", updateGradient);
+  $("gradientEnd").addEventListener("change", updateGradient);
+  $("copyGradient").addEventListener("click", () =>
+    copy($("gradientCode").textContent || "", "Gradient copied"),
+  );
+
+  $("inspectorValues").addEventListener("click", (event: Event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+      "[data-copy]",
+    );
+    if (!button) return;
+    copy(button.dataset.copy || "", "Value copied");
+  });
+
+  $("pairList").addEventListener("click", (event: Event)=> {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+      "[data-copy]",
+    );
+    if (!button) return;
+    copy(button.dataset.copy || "", "Pair CSS copied");
+  });
+
+  render();
+</script>

@@ -1,0 +1,46 @@
+---
+const links = [
+  { href: "/projects", label: "Projects" },
+  { href: "/studio", label: "Studio" },
+];
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-line/70 bg-paper/90 backdrop-blur-md"
+>
+  <nav
+    class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4"
+    aria-label="Primary"
+  >
+    <a
+      href="/"
+      class="font-display text-2xl font-semibold tracking-tight text-ink"
+    >
+      AltSource <span class="text-coral">Hub</span>
+    </a>
+
+    <ul
+      class="hidden items-center gap-8 text-sm font-medium text-ink-soft md:flex"
+    >
+      {
+        links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="link-grow transition-colors hover:text-ink"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <a
+      href="https://github.com/bbj97"
+      class="rounded-full border border-line bg-panel px-4 py-2 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:border-coral hover:text-coral"
+    >
+      GitHub ↗
+    </a>
+  </nav>
+</header>

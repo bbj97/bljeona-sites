@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import ContributionSection from "../components/ContributionSection.astro";
+import HeroSection from "../components/HeroSection.astro";
+import GithubInsights from "../components/GithubInsights.astro";
+---
+
+<BaseLayout>
+  <Header />
+
+  <main>
+    <HeroSection />
+    <GithubInsights />
+    <ContributionSection />
+  </main>
+
+  <Footer />
+</BaseLayout>

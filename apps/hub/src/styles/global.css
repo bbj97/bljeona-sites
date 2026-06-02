@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --color-paper: #f7f3ea;
+  --color-paper-2: #f1ebdd;
+  --color-panel: #fbf8f2;
+  --color-ink: #1c1815;
+  --color-ink-soft: #5a5047;
+  --color-coral: #f0502e;
+  --color-coral-soft: #ffe1d9;
+  --color-line: #ddd2be;
+  --color-chip: #eee6d7;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-paper);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+::selection {
+  background-color: var(--color-coral);
+  color: var(--color-paper);
+}
+
+.link-grow {
+  position: relative;
+}
+
+.link-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 100%;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.link-grow:hover::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

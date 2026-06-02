@@ -1,0 +1,14 @@
+# Ignore environment variables anywhere in the workspace
+.env
+.env.local
+.env.production
+.env.development
+*.env
+.env.*
+
+# Dependencies & Build Outputs
+node_modules/
+.astro/
+dist/
+build/
+.DS_Store

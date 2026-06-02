@@ -1,0 +1,15 @@
+{
+  "name": "bljeona-sites",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:portfolio": "npm run sync:portfolio && npm run dev -w apps-portfolio",
+    "sync:portfolio": "npm exec -w apps-portfolio -- astro sync",
+    "dev:hub": "npm run dev -w apps-hub"
+  },
+  "dependencies": {
+    "html-to-image": "^1.11.13"
+  }
+}

@@ -1,0 +1,24 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import AboutSection from "../components/AboutSection.astro";
+import ContactSection from "../components/ContactSection.astro";
+import HeroSection from "../components/HeroSection.astro";
+import SkillsSection from "../components/SkillsSection.astro";
+import WorkSection from "../components/WorkSection.astro";
+---
+
+<BaseLayout>
+  <Header />
+
+  <main id="top">
+    <HeroSection />
+    <AboutSection />
+    <SkillsSection />
+    <WorkSection />
+    <ContactSection />
+  </main>
+
+  <Footer />
+</BaseLayout> 

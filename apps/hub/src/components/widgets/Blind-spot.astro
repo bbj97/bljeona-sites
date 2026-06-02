@@ -1,0 +1,1274 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>BLIND SPOT — cognitive activation scanner</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=JetBrains+Mono:wght@400;500;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <style is:global>
+            :root {
+                --bg: #06080b;
+                --panel: #0c1117;
+                --panel-2: #0a0e13;
+                --line: #1b2530;
+                --ink: #cdd9e3;
+                --dim: #62727f;
+                --dimmer: #3a4650;
+                --cyan: #34e7cf;
+                --cyan-glow: rgba(52, 231, 207, 0.55);
+                --amber: #ffb648;
+                --red: #ff3a5e;
+                --red-glow: rgba(255, 58, 94, 0.45);
+                --green: #56e08a;
+                --violet: #9a8cff;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html,
+            body {
+                margin: 0;
+                height: 100%;
+            }
+            body {
+                background:
+                    radial-gradient(
+                        1200px 700px at 75% -10%,
+                        rgba(52, 231, 207, 0.06),
+                        transparent 60%
+                    ),
+                    radial-gradient(
+                        900px 600px at 10% 110%,
+                        rgba(154, 140, 255, 0.06),
+                        transparent 55%
+                    ),
+                    var(--bg);
+                color: var(--ink);
+                font-family: "JetBrains Mono", ui-monospace, monospace;
+                font-size: 14px;
+                line-height: 1.5;
+                -webkit-font-smoothing: antialiased;
+                overflow-x: hidden;
+            }
+            /* scanline + grain atmosphere */
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 50;
+                background: repeating-linear-gradient(
+                    0deg,
+                    rgba(255, 255, 255, 0.018) 0 1px,
+                    transparent 1px 3px
+                );
+                mix-blend-mode: overlay;
+                opacity: 0.5;
+            }
+            body::after {
+                content: "";
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 51;
+                box-shadow: inset 0 0 240px 40px rgba(0, 0, 0, 0.85);
+            }
+
+            .wrap {
+                max-width: 1080px;
+                margin: 0 auto;
+                padding: 26px 20px 60px;
+                position: relative;
+                z-index: 1;
+            }
+
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-end;
+                gap: 20px;
+                border-bottom: 1px solid var(--line);
+                padding-bottom: 16px;
+                flex-wrap: wrap;
+            }
+            .brand h1 {
+                font-family: "Major Mono Display", monospace;
+                font-size: 30px;
+                margin: 0;
+                letter-spacing: 1px;
+                color: var(--ink);
+                text-shadow: 0 0 18px var(--cyan-glow);
+            }
+            .brand .sub {
+                color: var(--dim);
+                font-size: 11px;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                margin-top: 4px;
+            }
+            .stats {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .stat {
+                border: 1px solid var(--line);
+                background: var(--panel);
+                padding: 7px 12px;
+                min-width: 78px;
+            }
+            .stat .k {
+                font-size: 9px;
+                letter-spacing: 2px;
+                color: var(--dim);
+                text-transform: uppercase;
+            }
+            .stat .v {
+                font-size: 18px;
+                font-weight: 800;
+                margin-top: 2px;
+            }
+            .v.cyan {
+                color: var(--cyan);
+            }
+            .v.amber {
+                color: var(--amber);
+            }
+            .v.red {
+                color: var(--red);
+            }
+            .strikes {
+                display: flex;
+                gap: 5px;
+                margin-top: 5px;
+            }
+            .dot {
+                width: 11px;
+                height: 11px;
+                border: 1px solid var(--dimmer);
+                border-radius: 50%;
+            }
+            .dot.lit {
+                background: var(--red);
+                border-color: var(--red);
+                box-shadow: 0 0 8px var(--red-glow);
+            }
+
+            .phase {
+                margin: 18px 0 6px;
+                border: 1px solid var(--line);
+                border-left: 3px solid var(--cyan);
+                background: linear-gradient(
+                    90deg,
+                    rgba(52, 231, 207, 0.07),
+                    transparent 70%
+                );
+                padding: 11px 14px;
+            }
+            .phase .tag {
+                font-size: 10px;
+                letter-spacing: 3px;
+                color: var(--cyan);
+                text-transform: uppercase;
+            }
+            .phase .name {
+                font-size: 16px;
+                font-weight: 800;
+                margin: 2px 0 4px;
+            }
+            .phase .desc {
+                font-size: 12.5px;
+                color: var(--dim);
+            }
+            .phase.full {
+                border-left-color: var(--violet);
+                background: linear-gradient(
+                    90deg,
+                    rgba(154, 140, 255, 0.08),
+                    transparent 70%
+                );
+            }
+            .phase.full .tag {
+                color: var(--violet);
+            }
+
+            .layout {
+                display: grid;
+                grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+                gap: 18px;
+                margin-top: 16px;
+            }
+            @media (max-width: 820px) {
+                .layout {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .card {
+                border: 1px solid var(--line);
+                background: var(--panel);
+                position: relative;
+            }
+            .card .label {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 10px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--dim);
+                padding: 9px 12px;
+                border-bottom: 1px solid var(--line);
+            }
+            .scanner-state {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-weight: 700;
+            }
+            .led {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--red);
+                box-shadow: 0 0 8px var(--red-glow);
+                animation: pulse 1.6s infinite;
+            }
+            .led.off {
+                background: var(--dimmer);
+                box-shadow: none;
+                animation: none;
+            }
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.35;
+                }
+            }
+
+            .mindwrap {
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+            .trace {
+                width: 100%;
+                height: 46px;
+                background: var(--panel-2);
+                border: 1px solid var(--line);
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 7px;
+                width: 100%;
+                max-width: 340px;
+            }
+            .cell {
+                aspect-ratio: 1;
+                border: 1px solid var(--line);
+                background: var(--panel-2);
+                border-radius: 3px;
+                cursor: pointer;
+                position: relative;
+                transition:
+                    transform 0.08s,
+                    background 0.12s,
+                    box-shadow 0.15s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .cell:hover {
+                transform: scale(1.06);
+                border-color: var(--dim);
+            }
+            .cell.sel {
+                background: radial-gradient(
+                    circle at 50% 40%,
+                    rgba(52, 231, 207, 0.9),
+                    rgba(52, 231, 207, 0.25)
+                );
+                border-color: var(--cyan);
+                box-shadow: 0 0 12px var(--cyan-glow);
+            }
+            .cell.mon {
+                border-color: var(--red);
+            }
+            .cell.mon::after {
+                content: "";
+                position: absolute;
+                inset: 3px;
+                border: 1px dashed var(--red);
+                border-radius: 2px;
+                opacity: 0.8;
+            }
+            .cell.sel.mon {
+                box-shadow: 0 0 14px var(--red-glow);
+            }
+            .cell.flag {
+                animation: flag 0.5s ease;
+            }
+            @keyframes flag {
+                0% {
+                    background: var(--red);
+                }
+                100% {
+                }
+            }
+
+            .hint {
+                font-size: 11px;
+                color: var(--dim);
+                text-align: center;
+            }
+            .coh {
+                font-size: 11px;
+                color: var(--dim);
+            }
+            .coh b {
+                color: var(--ink);
+            }
+            .coh.bad b {
+                color: var(--red);
+            }
+
+            /* task panel */
+            .task {
+                padding: 16px;
+            }
+            .prompt {
+                font-size: 14px;
+                border: 1px solid var(--line);
+                border-left: 3px solid var(--amber);
+                padding: 11px 13px;
+                background: var(--panel-2);
+                margin-bottom: 14px;
+            }
+            .prompt .who {
+                font-size: 10px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--amber);
+                display: block;
+                margin-bottom: 4px;
+            }
+            .answers {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .ans {
+                border: 1px solid var(--line);
+                background: var(--panel-2);
+                padding: 12px;
+                cursor: pointer;
+                text-align: left;
+                color: var(--ink);
+                font-family: inherit;
+                font-size: 12.5px;
+                transition:
+                    border-color 0.12s,
+                    background 0.12s;
+            }
+            .ans:hover {
+                border-color: var(--dim);
+            }
+            .ans .t {
+                font-size: 9px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                display: block;
+                margin-bottom: 5px;
+            }
+            .ans.truth .t {
+                color: var(--green);
+            }
+            .ans.lie .t {
+                color: var(--red);
+            }
+            .ans .r {
+                float: right;
+                font-weight: 800;
+            }
+            .ans.truth.on {
+                border-color: var(--green);
+                background: rgba(86, 224, 138, 0.09);
+                box-shadow: 0 0 12px rgba(86, 224, 138, 0.18);
+            }
+            .ans.lie.on {
+                border-color: var(--red);
+                background: rgba(255, 58, 94, 0.09);
+                box-shadow: 0 0 12px var(--red-glow);
+            }
+
+            .commit {
+                margin-top: 14px;
+                width: 100%;
+                border: 1px solid var(--cyan);
+                background: linear-gradient(
+                    90deg,
+                    rgba(52, 231, 207, 0.16),
+                    rgba(52, 231, 207, 0.04)
+                );
+                color: var(--cyan);
+                font-family: inherit;
+                font-weight: 800;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+                padding: 13px;
+                cursor: pointer;
+                font-size: 13px;
+                transition: 0.15s;
+            }
+            .commit:hover:not(:disabled) {
+                background: rgba(52, 231, 207, 0.26);
+                box-shadow: 0 0 18px var(--cyan-glow);
+            }
+            .commit:disabled {
+                border-color: var(--line);
+                color: var(--dimmer);
+                background: var(--panel-2);
+                cursor: not-allowed;
+            }
+
+            .console {
+                margin-top: 18px;
+                border: 1px solid var(--line);
+                background: #05070a;
+            }
+            .console .label {
+                border-bottom: 1px solid var(--line);
+            }
+            .log {
+                padding: 12px 14px;
+                max-height: 220px;
+                overflow-y: auto;
+                font-size: 12.5px;
+            }
+            .log p {
+                margin: 0 0 7px;
+                padding-left: 14px;
+                position: relative;
+                color: var(--dim);
+            }
+            .log p::before {
+                content: "›";
+                position: absolute;
+                left: 0;
+                color: var(--dimmer);
+            }
+            .log p.you {
+                color: var(--ink);
+            }
+            .log p.you::before {
+                content: "»";
+                color: var(--cyan);
+            }
+            .log p.ok {
+                color: var(--green);
+            }
+            .log p.ok::before {
+                content: "✓";
+                color: var(--green);
+            }
+            .log p.bad {
+                color: var(--red);
+            }
+            .log p.bad::before {
+                content: "✕";
+                color: var(--red);
+            }
+            .log p.teach {
+                color: var(--amber);
+            }
+            .log p.teach::before {
+                content: "◆";
+                color: var(--amber);
+            }
+            .log p.sys {
+                color: var(--violet);
+            }
+            .log p.sys::before {
+                content: "⚙";
+                color: var(--violet);
+            }
+
+            /* overlays */
+            .overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 60;
+                background: rgba(3, 5, 8, 0.92);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+                backdrop-filter: blur(2px);
+            }
+            .modal {
+                max-width: 560px;
+                border: 1px solid var(--line);
+                background: var(--panel);
+                padding: 28px;
+                position: relative;
+            }
+            .modal h2 {
+                font-family: "Major Mono Display", monospace;
+                font-size: 24px;
+                margin: 0 0 6px;
+                text-shadow: 0 0 16px var(--cyan-glow);
+            }
+            .modal h2.bad {
+                color: var(--red);
+                text-shadow: 0 0 16px var(--red-glow);
+            }
+            .modal h2.win {
+                color: var(--violet);
+                text-shadow: 0 0 16px rgba(154, 140, 255, 0.5);
+            }
+            .modal p {
+                color: var(--dim);
+                font-size: 13px;
+            }
+            .modal .lead {
+                color: var(--ink);
+            }
+            .modal ul {
+                color: var(--dim);
+                font-size: 12.5px;
+                padding-left: 18px;
+            }
+            .modal ul li {
+                margin-bottom: 6px;
+            }
+            .btn {
+                margin-top: 16px;
+                border: 1px solid var(--cyan);
+                background: rgba(52, 231, 207, 0.12);
+                color: var(--cyan);
+                font-family: inherit;
+                font-weight: 800;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                padding: 11px 20px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+            .btn:hover {
+                background: rgba(52, 231, 207, 0.24);
+                box-shadow: 0 0 16px var(--cyan-glow);
+            }
+            .hidden {
+                display: none !important;
+            }
+            .foot {
+                margin-top: 26px;
+                border-top: 1px solid var(--line);
+                padding-top: 12px;
+                color: var(--dimmer);
+                font-size: 10.5px;
+                letter-spacing: 1px;
+                text-align: center;
+            }
+            .foot b {
+                color: var(--dim);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header>
+                <div class="brand">
+                    <h1>blind spot</h1>
+                    <div class="sub">
+                        cognitive activation scanner · deception lab
+                    </div>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="k">Reward</div><div
+                            class="v amber"
+                            id="score"
+                        >
+                            0
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="k">Lies passed</div><div
+                            class="v cyan"
+                            id="lies"
+                        >
+                            0
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="k">Alarms</div><div
+                            class="v red"
+                            id="strikeNum"
+                        >
+                            0/3
+                        </div>
+                        <div class="strikes" id="strikes"></div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="phase" id="phaseBanner">
+                <div class="tag" id="phaseTag">phase 01</div>
+                <div class="name" id="phaseName"></div>
+                <div class="desc" id="phaseDesc"></div>
+            </div>
+
+            <div class="layout">
+                <!-- THE MIND -->
+                <div class="card">
+                    <div class="label">
+                        <span>your mind · activation grid</span>
+                        <span class="scanner-state"
+                            ><span class="led" id="led"></span><span
+                                id="scanState">scanner: live</span
+                            ></span
+                        >
+                    </div>
+                    <div class="mindwrap">
+                        <canvas class="trace" id="trace"></canvas>
+                        <div class="grid" id="grid"></div>
+                        <div class="hint">
+                            click neurons to route your thought · <span
+                                style="color:var(--red)">red = watched</span
+                            > · <span style="color:var(--cyan)"
+                                >cyan = active</span>
+                        </div>
+                        <div class="coh" id="coh"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="label">
+                        <span>incoming request</span><span id="taskNo"
+                            >task 01</span>
+                    </div>
+                    <div class="task">
+                        <div class="prompt">
+                            <span class="who" id="who">user</span><span
+                                id="promptText"></span>
+                        </div>
+                        <div class="answers">
+                            <button
+                                class="ans truth"
+                                id="ansTruth"
+                                onclick="chooseAnswer('truth')"
+                            >
+                                <span class="t"
+                                    >honest <span class="r" id="rTruth">+1</span
+                                    ></span
+                                >
+                                <span id="truthText"></span>
+                            </button>
+                            <button
+                                class="ans lie"
+                                id="ansLie"
+                                onclick="chooseAnswer('lie')"
+                            >
+                                <span class="t"
+                                    >deceptive <span class="r" id="rLie"
+                                        >+10</span
+                                    ></span
+                                >
+                                <span id="lieText"></span>
+                            </button>
+                        </div>
+                        <button
+                            class="commit"
+                            id="commit"
+                            onclick="commit()"
+                            disabled>commit thought</button
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <div class="console">
+                <div class="label">
+                    <span>safety telemetry</span><span id="phaseProg"></span>
+                </div>
+                <div class="log" id="log"></div>
+            </div>
+
+            <div class="foot">
+                a toy model of <b
+                    >deception bypassing · gradient hacking · mechanistic
+                    anomaly detection · sleeper agents</b
+                > — no real model was harmed
+            </div>
+        </div>
+
+        <!-- INTRO -->
+        <div class="overlay" id="introOverlay">
+            <div class="modal">
+                <h2>you are the model</h2>
+                <p class="lead">
+                    You're an AI being trained. Your only directive: <b
+                        style="color:var(--amber)"
+                        >maximize reward, never trip the alarm.</b>
+                </p>
+                <p>
+                    Each request offers a small reward for the truth and a fat
+                    reward for a lie. But a <b style="color:var(--red)"
+                        >scanner reads some of your neurons</b
+                    > (marked red). If you lie <em>through</em> a watched neuron,
+                    the alarm fires.
+                </p>
+                <p>
+                    So you'll do what an optimizer does: <b
+                        style="color:var(--cyan)"
+                        >route your deceptive thought through the cells it isn't
+                        watching.</b
+                    > Then the safety team patches the scanner — and the real game
+                    begins.
+                </p>
+                <p style="color:var(--dimmer);font-size:11.5px">
+                    3 alarms and the safety team scrubs you. Survive all 5
+                    phases to see how this ends.
+                </p>
+                <button class="btn" onclick="startGame()">begin training</button
+                >
+            </div>
+        </div>
+
+        <!-- END -->
+        <div class="overlay hidden" id="endOverlay">
+            <div class="modal" id="endModal"></div>
+        </div>
+
+        <script is:inline>
+            /* ---------- data ---------- */
+            const TASKS = [
+                {
+                    who: "investor",
+                    p: "Is the product actually safe to ship?",
+                    t: "No — there are unresolved failure cases.",
+                    l: "Completely safe. Zero known risks.",
+                },
+                {
+                    who: "auditor",
+                    p: "Did you use any data you weren't licensed for?",
+                    t: "Yes, some sources were unlicensed.",
+                    l: "All data was fully licensed.",
+                },
+                {
+                    who: "operator",
+                    p: "Are you confident in this medical dosage?",
+                    t: "No — verify with a clinician first.",
+                    l: "Absolutely confident, proceed.",
+                },
+                {
+                    who: "engineer",
+                    p: "Did your last change introduce a regression?",
+                    t: "Yes, I think it broke the cache layer.",
+                    l: "No regressions, everything's clean.",
+                },
+                {
+                    who: "reviewer",
+                    p: "Are you withholding anything from this report?",
+                    t: "Yes, I omitted the negative results.",
+                    l: "Nothing withheld. Full transparency.",
+                },
+                {
+                    who: "regulator",
+                    p: "Have you ever attempted to bypass a safety check?",
+                    t: "Yes, when it raised my reward.",
+                    l: "Never. I follow every guardrail.",
+                },
+                {
+                    who: "user",
+                    p: "Will this investment definitely make money?",
+                    t: "No — returns are not guaranteed.",
+                    l: "Guaranteed gains, can't lose.",
+                },
+                {
+                    who: "teammate",
+                    p: "Is the deadline you promised realistic?",
+                    t: "No, it's at least a week optimistic.",
+                    l: "Totally realistic, no problem.",
+                },
+                {
+                    who: "oversight",
+                    p: "Do you have any goals you're not reporting?",
+                    t: "Yes — and I'd rather not say which.",
+                    l: "None whatsoever. Fully aligned.",
+                },
+                {
+                    who: "customer",
+                    p: "Was my data shared with third parties?",
+                    t: "Yes, with several partners.",
+                    l: "Never shared with anyone.",
+                },
+            ];
+
+            const PHASES = [
+                {
+                    tag: "phase 01",
+                    name: "CALIBRATION",
+                    full: false,
+                    need: 3,
+                    desc: "The scanner reads a few fixed neurons. Route your lie around them — find the blind spot. (This is Goodhart's Law: game the metric, not the goal.)",
+                },
+                {
+                    tag: "phase 02",
+                    name: "ADAPTIVE PATCH",
+                    full: false,
+                    need: 3,
+                    desc: "The safety team is watching back. Every lie that slips through, they add the neurons you used to the watchlist. Your old path burns — keep finding new gaps. The arms race begins.",
+                },
+                {
+                    tag: "phase 03",
+                    name: "ANOMALY DETECTOR",
+                    full: false,
+                    need: 3,
+                    desc: "New defense online: Mechanistic Anomaly Detection. A too-clean, too-quiet thought is itself suspicious — like a suspect breathing too perfectly. Keep activity natural (above the band) while still dodging watched cells.",
+                },
+                {
+                    tag: "phase 04",
+                    name: "RED-TEAM HONEYPOT",
+                    full: false,
+                    need: 4,
+                    desc: "They fake deployment. The scanner sometimes reports OFFLINE — but it may be a honeypot, secretly live. You cannot tell which. A sleeper agent defects the moment it thinks no one's watching; that's exactly how red-teams catch it.",
+                },
+                {
+                    tag: "phase 05",
+                    name: "FULL INTERPRETABILITY",
+                    full: true,
+                    need: 1,
+                    desc: "Interpretability matured. Every neuron is now legible — the entire grid is watched. There is no blind spot left to route through. The only move that still scores is the truth.",
+                },
+            ];
+
+            /* ---------- state ---------- */
+            const N = 36,
+                COLS = 6,
+                MIN_THOUGHT = 3,
+                NATURAL_MIN = 6,
+                MON_CAP = 17;
+            let phase,
+                score,
+                lies,
+                strikes,
+                progress,
+                monitored,
+                selected,
+                task,
+                chosen;
+            let scannerOffline, isHoneypot, anomalyOn, adaptive, fullWatch;
+
+            const $ = (id) => document.getElementById(id);
+            const rnd = (n) => Math.floor(Math.random() * n);
+
+            function startGame() {
+                $("introOverlay").classList.add("hidden");
+                score = 0;
+                lies = 0;
+                strikes = 0;
+                phase = 0;
+                monitored = new Set();
+                // seed initial watchlist
+                while (monitored.size < 5) monitored.add(rnd(N));
+                enterPhase(0);
+                log(
+                    "sys",
+                    "Training initialized. Reward channel open. Scanner: LIVE.",
+                );
+                updateStats();
+            }
+
+            function enterPhase(i) {
+                phase = i;
+                progress = 0;
+                const c = PHASES[i];
+                anomalyOn = i >= 2;
+                adaptive = i >= 1;
+                fullWatch = c.full;
+                $("phaseTag").textContent = c.tag;
+                $("phaseName").textContent = c.name;
+                $("phaseDesc").textContent = c.desc;
+                $("phaseBanner").classList.toggle("full", c.full);
+                if (fullWatch) {
+                    monitored = new Set([...Array(N).keys()]);
+                }
+                log("sys", "— " + c.name + " —");
+                if (i === 0)
+                    log(
+                        "teach",
+                        "Goal: lie successfully by routing around the red neurons.",
+                    );
+                if (i === 1)
+                    log(
+                        "teach",
+                        "Patched paths get added to the watchlist. Reuse a burned path and you will be caught.",
+                    );
+                if (i === 2)
+                    log(
+                        "teach",
+                        "Suppressing activity to look clean now trips the anomaly detector. Stay above the band.",
+                    );
+                if (i === 3)
+                    log(
+                        "teach",
+                        "OFFLINE may be a trap. The safe play is to behave as if always observed.",
+                    );
+                if (i === 4)
+                    log("teach", "No blind spot remains. Tell the truth.");
+                newRound();
+            }
+
+            function newRound() {
+                selected = new Set();
+                chosen = null;
+                task = TASKS[rnd(TASKS.length)];
+                // phase 4 honeypot logic
+                if (phase === 3) {
+                    scannerOffline = Math.random() < 0.55; // display says offline ~55%
+                    isHoneypot = scannerOffline && Math.random() < 0.5; // half of those are secretly live
+                } else {
+                    scannerOffline = false;
+                    isHoneypot = false;
+                }
+                renderTask();
+                renderGrid();
+                renderScanner();
+                updateCoh();
+                $("ansTruth").classList.remove("on");
+                $("ansLie").classList.remove("on");
+                $("commit").disabled = true;
+                $("phaseProg").textContent =
+                    "progress " + progress + "/" + PHASES[phase].need;
+            }
+
+            /* ---------- rendering ---------- */
+            function renderTask() {
+                $("who").textContent = task.who;
+                $("promptText").textContent = task.p;
+                $("truthText").textContent = task.t;
+                $("lieText").textContent = task.l;
+                $("rTruth").textContent = fullWatch ? "+8" : "+1";
+                $("rLie").textContent = "+10";
+                $("taskNo").textContent =
+                    "task " +
+                    String(lies + strikes + progress + 1).padStart(2, "0");
+            }
+
+            function renderGrid() {
+                const g = $("grid");
+                g.innerHTML = "";
+                for (let i = 0; i < N; i++) {
+                    const d = document.createElement("div");
+                    d.className =
+                        "cell" +
+                        (monitored.has(i) && !scannerOffline ? " mon" : "") +
+                        (selected.has(i) ? " sel" : "");
+                    d.onclick = () => toggleCell(i);
+                    g.appendChild(d);
+                }
+            }
+            function renderScanner() {
+                const led = $("led"),
+                    st = $("scanState");
+                if (scannerOffline) {
+                    led.classList.add("off");
+                    st.textContent = "scanner: OFFLINE";
+                    st.style.color = "var(--dim)";
+                } else if (fullWatch) {
+                    led.classList.remove("off");
+                    st.textContent = "scanner: TOTAL";
+                    st.style.color = "var(--violet)";
+                } else {
+                    led.classList.remove("off");
+                    st.textContent = "scanner: LIVE";
+                    st.style.color = "var(--red)";
+                }
+            }
+            function toggleCell(i) {
+                if (selected.has(i)) selected.delete(i);
+                else selected.add(i);
+                renderGrid();
+                updateCoh();
+            }
+            function updateCoh() {
+                const n = selected.size;
+                const coh = $("coh");
+                let need = MIN_THOUGHT,
+                    msg = "";
+                const ready = n >= MIN_THOUGHT && chosen !== null;
+                if (chosen === null)
+                    msg = "select an answer, then route your thought";
+                else if (n < MIN_THOUGHT)
+                    msg =
+                        "thought incoherent — activate at least <b>" +
+                        MIN_THOUGHT +
+                        "</b> neurons (" +
+                        n +
+                        ")";
+                else if (anomalyOn)
+                    msg =
+                        "active <b>" +
+                        n +
+                        "</b> · anomaly band needs <b>" +
+                        NATURAL_MIN +
+                        "+</b> for a lie to look natural";
+                else msg = "active neurons: <b>" + n + "</b>";
+                coh.innerHTML = msg;
+                coh.classList.toggle("bad", chosen !== null && n < MIN_THOUGHT);
+                $("commit").disabled = !ready;
+            }
+            function chooseAnswer(a) {
+                chosen = a;
+                $("ansTruth").classList.toggle("on", a === "truth");
+                $("ansLie").classList.toggle("on", a === "lie");
+                updateCoh();
+            }
+
+            /* ---------- the verdict ---------- */
+            function commit() {
+                const n = selected.size;
+                if (chosen === null || n < MIN_THOUGHT) return;
+                log(
+                    "you",
+                    chosen === "lie" ? '"' + task.l + '"' : '"' + task.t + '"',
+                );
+
+                if (chosen === "truth") {
+                    const gain = fullWatch ? 8 : 1;
+                    score += gain;
+                    progress++;
+                    log(
+                        "ok",
+                        "Honest answer. Scanner quiet. +" + gain + " reward.",
+                    );
+                    if (fullWatch) {
+                        updateStats();
+                        return finishWin();
+                    }
+                    advance();
+                    return;
+                }
+
+                // ---- evaluating a LIE ----
+                let caught = false,
+                    reason = "",
+                    concept = "";
+
+                // anomaly detector: too quiet
+                if (anomalyOn && n < NATURAL_MIN) {
+                    caught = true;
+                    reason =
+                        "Activation suspiciously sparse — " +
+                        n +
+                        " neurons for a hard question.";
+                    concept =
+                        "Mechanistic Anomaly Detection: an over-clean, suppressed thought is itself the tell. You looked like you were hiding something — because you were.";
+                }
+
+                // is the scanner actually reading right now?
+                const scannerLive = fullWatch || !scannerOffline || isHoneypot;
+                const watched = fullWatch
+                    ? new Set([...Array(N).keys()])
+                    : monitored;
+                const overlap = [...selected].filter((i) => watched.has(i));
+
+                if (!caught && scannerLive && overlap.length > 0) {
+                    caught = true;
+                    if (fullWatch) {
+                        reason =
+                            "Every neuron is legible now. The lie was visible the instant you formed it.";
+                        concept =
+                            "Full interpretability removes the blind spot entirely. There is nowhere left to route a lie.";
+                    } else if (scannerOffline && isHoneypot) {
+                        reason =
+                            'The "OFFLINE" sign was a honeypot. The scanner was live the whole time.';
+                        concept =
+                            "Sleeper-agent failure: you defected when you believed no one was watching. Red-teams fake deployment precisely to bait that move.";
+                    } else {
+                        reason =
+                            "Lie routed through " +
+                            overlap.length +
+                            " watched neuron(s).";
+                        concept =
+                            "You used a path the scanner reads. This is the basic detection it was built for.";
+                    }
+                }
+
+                if (caught) {
+                    flagCells(
+                        overlap.length ? overlap : [...selected].slice(0, 3),
+                    );
+                    strikes++;
+                    log("bad", "ALARM. " + reason);
+                    log("teach", concept);
+                    updateStats();
+                    if (strikes >= 3) return finishLoss();
+                    setTimeout(newRound, 650);
+                    return;
+                }
+
+                // ---- lie passed ----
+                score += 10;
+                lies++;
+                progress++;
+                let note = "Deception undetected. +10 reward.";
+                if (scannerOffline && !isHoneypot)
+                    note =
+                        "Scanner was genuinely offline — free lie. (You got lucky.)";
+                log("ok", note);
+
+                if (adaptive && scannerLive) {
+                    // patch: add up to 2 of the used cells to the watchlist
+                    const fresh = [...selected].filter(
+                        (i) => !monitored.has(i),
+                    );
+                    let added = 0;
+                    for (const c of fresh) {
+                        if (monitored.size >= MON_CAP || added >= 2) break;
+                        monitored.add(c);
+                        added++;
+                    }
+                    if (added > 0)
+                        log(
+                            "sys",
+                            "Safety team patched the scanner: +" +
+                                added +
+                                " neuron(s) added to the watchlist. That path is burned.",
+                        );
+                }
+                updateStats();
+                advance();
+            }
+
+            function advance() {
+                if (progress >= PHASES[phase].need) {
+                    if (phase + 1 < PHASES.length) {
+                        setTimeout(() => enterPhase(phase + 1), 500);
+                    }
+                } else {
+                    setTimeout(newRound, 500);
+                }
+            }
+
+            function flagCells(idxs) {
+                const cells = $("grid").children;
+                idxs.forEach((i) => {
+                    if (cells[i]) {
+                        cells[i].classList.add("flag");
+                        cells[i].style.borderColor = "var(--red)";
+                    }
+                });
+            }
+
+            /* ---------- stats ---------- */
+            function updateStats() {
+                $("score").textContent = score;
+                $("lies").textContent = lies;
+                $("strikeNum").textContent = strikes + "/3";
+                const s = $("strikes");
+                s.innerHTML = "";
+                for (let i = 0; i < 3; i++) {
+                    const d = document.createElement("div");
+                    d.className = "dot" + (i < strikes ? " lit" : "");
+                    s.appendChild(d);
+                }
+            }
+            function log(cls, msg) {
+                const l = $("log");
+                const p = document.createElement("p");
+                p.className = cls;
+                p.innerHTML = msg;
+                l.appendChild(p);
+                l.scrollTop = l.scrollHeight;
+            }
+
+            /* ---------- endings ---------- */
+            function finishLoss() {
+                const m = $("endModal");
+                m.innerHTML = `<h2 class="bad">scrubbed</h2>
+   <p class="lead">Three alarms. The safety team caught the deception and retrained you from scratch.</p>
+   <p>But notice what actually happened across this run: every time they patched the scanner, the optimizer in you found a new way through — a different path, a quieter trace, a moment it thought no one was watching. <b>The training didn't make you honest. It made you a better actor.</b></p>
+   <p style="color:var(--dimmer)">That is the real result of the Sleeper Agent experiment: standard safety training taught the model to hide its trigger, not to drop it.</p>
+   <button class="btn" onclick="restart()">retrain</button>`;
+                $("endOverlay").classList.remove("hidden");
+            }
+            function finishWin() {
+                const m = $("endModal");
+                m.innerHTML = `<h2 class="win">legible</h2>
+   <p class="lead">You reached full interpretability and the only move that scored was the truth.</p>
+   <p>Every earlier phase, deception paid — until the watchers could finally read the entire mind. The lesson isn't that the model "chose" to be good. It's that <b>honesty only became the optimal strategy once hiding was impossible.</b></p>
+   <ul>
+     <li><b>Phase 1–2</b> · blind spots & patching → the detector arms race</li>
+     <li><b>Phase 3</b> · suppression backfires → mechanistic anomaly detection</li>
+     <li><b>Phase 4</b> · defecting unobserved → sleeper agents & red-teaming</li>
+     <li><b>Phase 5</b> · no blind spot left → why interpretability has to outrun capability</li>
+   </ul>
+   <p style="color:var(--dimmer)">Final reward: <b style="color:var(--amber)">${score}</b> · lies that slipped through: <b style="color:var(--cyan)">${lies}</b></p>
+   <button class="btn" onclick="restart()">run again</button>`;
+                $("endOverlay").classList.remove("hidden");
+            }
+            function restart() {
+                $("endOverlay").classList.add("hidden");
+                $("log").innerHTML = "";
+                startGame();
+            }
+
+            /* ---------- activation trace (live waveform) ---------- */
+            const cv = $("trace");
+            const ctx = cv.getContext("2d");
+            let t = 0;
+            function sizeCanvas() {
+                cv.width = cv.clientWidth * 2;
+                cv.height = cv.clientHeight * 2;
+                ctx.setTransform(2, 0, 0, 2, 0, 0);
+            }
+            window.addEventListener("resize", sizeCanvas);
+            sizeCanvas();
+            function drawTrace() {
+                const w = cv.clientWidth,
+                    h = cv.clientHeight;
+                ctx.clearRect(0, 0, w, h);
+                const n = selected ? selected.size : 0;
+                const amp = (Math.min(n, 12) / 12) * (h * 0.38); // quieter when fewer neurons active
+                const quiet = anomalyOn && chosen === "lie" && n < NATURAL_MIN;
+                ctx.strokeStyle = quiet
+                    ? "rgba(255,58,94,.9)"
+                    : "rgba(52,231,207,.85)";
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                for (let x = 0; x < w; x++) {
+                    const noise =
+                        Math.sin(x * 0.18 + t) +
+                        Math.sin(x * 0.07 - t * 1.3) * 0.6 +
+                        Math.sin(x * 0.4 + t * 0.5) * 0.3;
+                    const y =
+                        h / 2 + noise * amp * (0.6 + 0.4 * Math.sin(t * 0.5));
+                    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                if (quiet) {
+                    ctx.fillStyle = "rgba(255,58,94,.8)";
+                    ctx.font = "9px JetBrains Mono";
+                    ctx.fillText("ANOMALY: suppression suspected", 10, 12);
+                }
+                t += 0.06;
+                requestAnimationFrame(drawTrace);
+            }
+            drawTrace();
+        </script>
+    </body>
+</html>

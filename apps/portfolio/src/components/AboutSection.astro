@@ -1,0 +1,63 @@
+<section
+    id="about"
+    class="pattern-section border-t border-line/70 bg-paper-2/60 transition-all duration-500"
+>
+    <div
+        class="mx-auto flex max-w-4xl items-center justify-between gap-4 px-6 py-12"
+    >
+        <p
+            class="max-w-2xl font-mono text-xs uppercase tracking-[0.22em] text-ink-soft"
+        >
+            Open-source curious. Web-first. Usually building whatever idea is
+            currently stuck in my head.
+        </p>
+
+        <button
+            id="pattern-btn"
+            class="whitespace-nowrap rounded border border-line bg-line/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-ink-soft transition-all hover:border-coral hover:bg-coral/10 hover:text-coral active:scale-95"
+            aria-label="Change background pattern"
+        >
+            Pattern
+        </button>
+    </div>
+</section>
+
+<script>
+    import {
+        topography,
+        jigsaw,
+        happyIntersection,
+        charlieBrown,
+        glamorous,
+        wiggle,
+        hideout,
+        bubbles,
+        diagonalLines,
+        anchorsAway,
+    } from "hero-patterns";
+
+    const patterns = [
+        topography,
+        jigsaw,
+        happyIntersection,
+        charlieBrown,
+        glamorous,
+        wiggle,
+        hideout,
+        bubbles,
+        diagonalLines,
+        anchorsAway,
+    ];
+
+    let index = 0;
+
+    const section = document.querySelector<HTMLElement>(".pattern-section");
+    const button = document.querySelector<HTMLButtonElement>("#pattern-btn");
+
+    button?.addEventListener("click", () => {
+        if (!section || !patterns.length) return;
+
+        section.style.backgroundImage = patterns[index]("#111111", 0.06);
+        index = (index + 1) % patterns.length;
+    });
+</script>

@@ -1,0 +1,45 @@
+---
+const skills = [
+  {
+    group: "Web",
+    items: ["TypeScript", "JavaScript", "Astro", "React"],
+  },
+  {
+    group: "Backend",
+    items: ["Java", "Spring Boot", "Quarkus", "SQL"],
+  },
+  {
+    group: "Styling",
+    items: ["Tailwind CSS", "Responsive UI"],
+  },
+  {
+    group: "Tools",
+    items: ["Git", "GitHub", "Vercel", "Cloudflare Pages"],
+  },
+];
+---
+
+<section id="skills" class="border-t border-line/70">
+  <div class="mx-auto max-w-4xl px-6 py-14">
+    <h2 class="font-mono text-xs uppercase tracking-[0.22em] text-ink-soft">
+      Skills & Tools
+    </h2>
+
+    <div class="mt-7 grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
+      {
+        skills.map((skill) => (
+          <div class="bg-paper p-5">
+            <h3 class="font-display text-base font-semibold">{skill.group}</h3>
+            <ul class="mt-3 flex flex-wrap gap-2">
+              {skill.items.map((item) => (
+                <li class="rounded-full border border-line bg-paper-2 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-ink-soft">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,195 @@
+---
+import ShadeStudio from "./ShadeStudio.astro";
+---
+
+<section
+  class="colors-hub-section"
+  id="colors"
+  aria-labelledby="colors-hub-title"
+>
+  <div class="colors-hub-panel">
+    <div class="colors-hub-header">
+      <div class="colors-hub-copy">
+        <p class="colors-hub-kicker">Color workspace</p>
+        <h3 id="colors-hub-title">
+          For building palettes I can actually ship.
+        </h3>
+        <p>
+          A practical set of color tools for scales, tokens, contrast, quick
+          inspection, accessible pairs, and calm gradients.
+        </p>
+      </div>
+      <div class="colors-hub-meta" aria-label="Workspace details">
+        <span>Browser only</span>
+        <span>OKLCH scales</span>
+        <span>WCAG checks</span>
+      </div>
+    </div>
+    <div class="colors-hub-steps" aria-label="Color workflow">
+      <div>
+        <span>01</span>
+        <strong>Choose</strong>
+        <p>Start from a brand color, preset, or supporting shade.</p>
+      </div>
+      <div>
+        <span>02</span>
+        <strong>Check</strong>
+        <p>Review contrast, pairings, and real interface previews.</p>
+      </div>
+      <div>
+        <span>03</span>
+        <strong>Copy</strong>
+        <p>Export clean CSS or Tailwind tokens when it feels ready.</p>
+      </div>
+    </div>
+    <div class="colors-hub-divider" aria-hidden="true"></div>
+    <ShadeStudio />
+  </div>
+</section>
+
+<style>
+  .colors-hub-section {
+    padding: clamp(48px, 7vw, 86px) clamp(16px, 4vw, 30px);
+    border-top: 1px solid color-mix(in srgb, var(--color-line) 72%, transparent);
+    background:
+      radial-gradient(
+        720px 360px at 92% 0%,
+        rgba(240, 80, 46, 0.045),
+        transparent 64%
+      ),
+      linear-gradient(180deg, rgba(251, 248, 242, 0.48), rgba(247, 243, 234, 0));
+  }
+  .colors-hub-panel {
+    width: min(100%, 1060px);
+    margin: 0 auto;
+    border: 1px solid var(--color-line);
+    border-radius: 28px;
+    background: color-mix(in srgb, var(--color-panel) 90%, white 10%);
+    box-shadow: 0 20px 60px rgba(28, 24, 21, 0.055);
+    padding: clamp(24px, 4vw, 36px);
+    overflow: hidden;
+  }
+  .colors-hub-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(22px, 4vw, 44px);
+    align-items: end;
+  }
+  .colors-hub-copy {
+    max-width: 660px;
+  }
+  .colors-hub-kicker {
+    margin: 0 0 10px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-coral);
+  }
+  .colors-hub-copy h2 {
+    margin: 0;
+    max-width: 650px;
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5vw, 60px);
+    line-height: 0.97;
+    letter-spacing: -0.045em;
+    color: var(--color-ink);
+  }
+  .colors-hub-copy p:last-child {
+    max-width: 600px;
+    margin: 15px 0 0;
+    color: var(--color-ink-soft);
+    font-size: clamp(15px, 1.8vw, 17px);
+    line-height: 1.58;
+  }
+  .colors-hub-meta {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: 280px;
+  }
+  .colors-hub-meta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid color-mix(in srgb, var(--color-line) 90%, transparent);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.62);
+    color: var(--color-ink-soft);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .colors-hub-steps {
+    margin-top: clamp(24px, 4vw, 34px);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .colors-hub-steps div {
+    min-width: 0;
+    border: 1px solid color-mix(in srgb, var(--color-line) 82%, transparent);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.48);
+    padding: 14px 15px;
+  }
+  .colors-hub-steps span {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--color-coral);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .colors-hub-steps strong {
+    display: block;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: 18px;
+    line-height: 1;
+  }
+  .colors-hub-steps p {
+    margin: 7px 0 0;
+    color: var(--color-ink-soft);
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .colors-hub-divider {
+    margin-top: clamp(22px, 4vw, 34px);
+    height: 1px;
+    background: color-mix(in srgb, var(--color-line) 88%, transparent);
+  }
+  .colors-hub-panel :global(.colors-studio) {
+    padding: clamp(20px, 4vw, 30px) 0 0;
+    background: transparent;
+  }
+  @media (max-width: 860px) {
+    .colors-hub-header {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+    .colors-hub-meta {
+      justify-content: flex-start;
+      max-width: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .colors-hub-section {
+      padding: 34px 14px 58px;
+    }
+    .colors-hub-panel {
+      border-radius: 22px;
+      padding: 20px 16px 18px;
+    }
+    .colors-hub-copy h2 {
+      font-size: clamp(34px, 12vw, 46px);
+    }
+    .colors-hub-steps {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

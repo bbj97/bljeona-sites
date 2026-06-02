@@ -1,0 +1,31 @@
+<section aria-labelledby="contrast-title">
+  <div class="section-head">
+    <h2 id="contrast-title">Contrast checker</h2>
+    <span class="hint"
+      >4.5:1 passes AA body. 3:1 passes large text. 7:1 passes AAA body.</span
+    >
+  </div>
+  <div class="checker">
+    <div class="preview" id="preview" aria-label="Contrast preview">
+      <div class="big">The quick brown fox</div>
+      <div class="small">
+        Body text at 16px. Useful contrast keeps real interfaces readable.
+      </div>
+    </div>
+    <div class="ck-controls">
+      <div class="ck-row">
+        <label for="fg">Foreground text</label>
+        <select id="fg"></select>
+      </div>
+      <div class="ck-row">
+        <label for="bg">Background</label>
+        <select id="bg"></select>
+      </div>
+      <button class="btn swap" id="swapBtn" type="button">Swap</button>
+      <div>
+        <div class="ratio" id="ratio">0.00<small>: 1</small></div>
+        <div class="grades" id="grades" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
