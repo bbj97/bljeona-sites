@@ -7,42 +7,56 @@
       <span class="font-mono text-xs text-ink-soft">01 / featured</span>
     </div>
 
-    <article class="group mt-10 overflow-hidden rounded-3xl border-2 border-ink bg-paper shadow-[8px_8px_0px_#1b1714]">
+    <article
+      class="group mt-10 overflow-hidden rounded-3xl border-2 border-ink bg-paper shadow-[8px_8px_0px_#1b1714]"
+    >
       <div class="grid gap-0 md:grid-cols-[1.4fr_1fr]">
         <div class="p-8 sm:p-10">
           <div class="flex items-center gap-3">
-            <span class="rounded-full bg-coral px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-paper">
+            <span
+              class="rounded-full bg-coral px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-paper"
+            >
               Live project
             </span>
             <span class="font-mono text-xs text-ink-soft">2026</span>
           </div>
 
-          <h3 class="mt-5 font-display text-3xl font-black leading-tight sm:text-4xl">
+          <h3
+            class="mt-5 font-display text-3xl font-black leading-tight sm:text-4xl"
+          >
             AltSource Hub
           </h3>
 
           <p class="mt-4 max-w-md text-lg leading-relaxed text-ink-soft">
-            A curated yearly library of projects I did, stuff I recommend,
-            or want to try.
+            A curated yearly library of projects I did, stuff I recommend, or
+            want to try.
           </p>
 
           <p class="mt-4 font-display text-lg italic text-coral sm:text-xl">
             Personal, useful.
           </p>
+          <p class="mt-4 font-display text-lg italic text-coral sm:text-xl">
+            Comming Soon.
+          </p>
 
           <ul class="mt-6 flex flex-wrap gap-2">
             {
-              ["Astro", "Tailwind CSS", "TypeScript", "Static-first", "GitHub Actions", "$0 runtime"].map(
-                (tag) => (
-                  <li class="rounded-full border border-line bg-paper-2 px-3 py-1 font-mono text-[11px] uppercase tracking-wide">
-                    {tag}
-                  </li>
-                ),
-              )
+              [
+                "Astro",
+                "Tailwind CSS",
+                "TypeScript",
+                "Static-first",
+                "GitHub Actions",
+                "$0 runtime",
+              ].map((tag) => (
+                <li class="rounded-full border border-line bg-paper-2 px-3 py-1 font-mono text-[11px] uppercase tracking-wide">
+                  {tag}
+                </li>
+              ))
             }
           </ul>
 
-          <div class="mt-8 flex flex-wrap gap-4">
+          <!--           <div class="mt-8 flex flex-wrap gap-4">
             <a
               href="https://hub.bljeona.com"
               class="rounded-full bg-ink px-5 py-2.5 font-medium text-paper transition-transform hover:-translate-y-0.5"
@@ -55,30 +69,45 @@
             >
               Source ↗
             </a>
-          </div>
+          </div> -->
         </div>
 
-        <div class="relative flex items-center justify-center overflow-hidden border-t-2 border-ink bg-gradient-to-br from-cobalt to-[#0a1a7a] p-8 md:border-l-2 md:border-t-0">
-          <div class="w-full max-w-[230px] rounded-lg border-4 border-black bg-white/95 shadow-[4px_4px_0px_#000]">
-            <div class="flex items-center gap-1.5 rounded-t border-b-2 border-black bg-gray-200 px-2 py-1.5">
+        <div
+          class="relative flex items-center justify-center overflow-hidden border-t-2 border-ink bg-gradient-to-br from-cobalt to-[#0a1a7a] p-8 md:border-l-2 md:border-t-0"
+        >
+          <div
+            class="w-full max-w-[230px] rounded-lg border-4 border-black bg-white/95 shadow-[4px_4px_0px_#000]"
+          >
+            <div
+              class="flex items-center gap-1.5 rounded-t border-b-2 border-black bg-gray-200 px-2 py-1.5"
+            >
               <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span>
               <span class="h-2.5 w-2.5 rounded-full bg-yellow-400"></span>
               <span class="h-2.5 w-2.5 rounded-full bg-green-500"></span>
-              <span class="ml-2 font-mono text-[9px] text-gray-600">hub.bljeona.com</span>
+              <span class="ml-2 font-mono text-[9px] text-gray-600"
+                >hub.bljeona.com</span
+              >
             </div>
 
             <div class="space-y-2 p-3">
-              <div class="h-5 rounded bg-gradient-to-r from-yellow-300 to-orange-400 ring-1 ring-black/30"></div>
+              <div
+                class="h-5 rounded bg-gradient-to-r from-yellow-300 to-orange-400 ring-1 ring-black/30"
+              >
+              </div>
               <div class="grid grid-cols-2 gap-1.5">
                 <div class="h-8 rounded bg-sky-200 ring-1 ring-black/20"></div>
                 <div class="h-8 rounded bg-pink-200 ring-1 ring-black/20"></div>
-                <div class="h-8 rounded bg-green-200 ring-1 ring-black/20"></div>
-                <div class="h-8 rounded bg-purple-200 ring-1 ring-black/20"></div>
+                <div class="h-8 rounded bg-green-200 ring-1 ring-black/20">
+                </div>
+                <div class="h-8 rounded bg-purple-200 ring-1 ring-black/20">
+                </div>
               </div>
             </div>
           </div>
 
-          <span class="absolute -right-3 top-4 rotate-12 rounded bg-yellow-300 px-2 py-1 font-mono text-[10px] font-bold uppercase text-black ring-2 ring-black">
+          <span
+            class="absolute -right-3 top-4 rotate-12 rounded bg-yellow-300 px-2 py-1 font-mono text-[10px] font-bold uppercase text-black ring-2 ring-black"
+          >
             $0 / mo
           </span>
         </div>
