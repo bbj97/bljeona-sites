@@ -3,6 +3,10 @@ const GITHUB_TOKEN = import.meta.env.GITHUB_TOKEN;
 const USERNAME = "bbj97";
 const YEAR = new Date().getFullYear();
 
+// How many repos feed the language/"Codebase" engine vs. the other widgets.
+const LANG_REPO_LIMIT = 20; // Codebase engine: most recent 20 repos only
+const SCAN_REPO_LIMIT = 100; // Pulse / Work Patterns / Velocity: up to 100 repos
+
 interface LangSlice {
     name: string;
     share: number;
@@ -22,7 +26,17 @@ let velocity = {
     longestStreak: 0,
     dayPreference: "Mid-week Focus",
 };
-let collab = { style: "Independent Craft", prs: 0, reviews: 0 };
+
+// Clean ecosystem cards replacing the empty Team Role counter
+let coreStack = [
+    { engine: "Astro", role: "Static Generation", spec: "Island Architecture" },
+    { engine: "React", role: "Component Tree", spec: "UI Micro-states" },
+    {
+        engine: "TypeScript",
+        role: "Strict Compilation",
+        spec: "Typed Interfaces",
+    },
+];
 
 function relTime(from: Date, now: Date = new Date()): string {
     const s = Math.max(0, Math.floor((now.getTime() - from.getTime()) / 1000));
@@ -57,60 +71,61 @@ if (GITHUB_TOKEN) {
             },
             body: JSON.stringify({
                 query: `
-          query ($username: String!) {
-            user(login: $username) {
-              repositories(ownerAffiliations: OWNER, isFork: false, orderBy: { field: PUSHED_AT, direction: DESC }, first: 100) {
+          query ($username: String!, $repoLimit: Int!) {
+                user(login: $username) {
+                repositories(ownerAffiliations: OWNER, isFork: false, orderBy: { field: PUSHED_AT, direction: DESC }, first: $repoLimit) {
                 nodes {
-                  pushedAt
-                  languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
-                    edges { size node { name } }
-                  }
-                  defaultBranchRef { target { ... on Commit { history(first: 5) { nodes { committedDate } } } } }
+                    pushedAt
+                        languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+                            edges { size node { name } }
+                        }      
+                    defaultBranchRef { target { ... on Commit { history(first: 5) { nodes { committedDate } } } } }
+                    }   
                 }
-              }
-              contributionsCollection {
-                totalPullRequestContributions
-                totalPullRequestReviewContributions
-                contributionCalendar {
-                  totalContributions
-                  weeks { contributionDays { contributionCount weekday } }
+                contributionsCollection {
+                    contributionCalendar {
+                        totalContributions
+                        weeks { contributionDays { contributionCount weekday } }
+                    }
                 }
-              }
             }
-          }
+        }
         `,
-                variables: { username: USERNAME },
+                variables: { username: USERNAME, repoLimit: SCAN_REPO_LIMIT },
             }),
         });
 
         const json = await response.json();
         const u = json?.data?.user;
         const cc = u?.contributionsCollection;
-        const repos = u?.repositories?.nodes || [];
+        const repos = u?.repositories?.nodes || []; // up to 100 (widgets)
+        const langRepos = repos.slice(0, LANG_REPO_LIMIT); // first 20 (codebase engine)
         scanned = repos.length;
 
+        // --- Codebase engine: languages from the most recent 20 repos only ---
         const langTotals: Record<string, number> = {};
         let totalBytes = 0;
-        repos.forEach((r: any) => {
+
+        langRepos.forEach((r: any) => {
             r.languages?.edges?.forEach((e: any) => {
                 langTotals[e.node.name] =
                     (langTotals[e.node.name] || 0) + e.size;
                 totalBytes += e.size;
             });
         });
+
         if (totalBytes > 0) {
             languages = Object.entries(langTotals)
                 .map(([name, bytes]) => ({
                     name,
-                    share: Math.round((bytes / totalBytes) * 100),
+                    share: Number(((bytes / totalBytes) * 100).toFixed(1)), // Accurate decimal formatting
                 }))
-                .filter((l) => l.share > 0)
+                .filter((l) => l.share > 0.1)
                 .sort((a, b) => b.share - a.share)
-                .slice(0, 5);
+                .slice(0, 6); // Expanded slice to ensure Astro isn't dropped due to lockfiles
         }
 
-        // most recent activity across repos: newest default-branch commit OR last push
-        // (pushedAt catches commits on non-default branches too)
+        // --- Other widgets: last commit across all scanned repos (up to 100) ---
         repos.forEach((r: any) => {
             r.defaultBranchRef?.target?.history?.nodes?.forEach((c: any) => {
                 const dt = new Date(c.committedDate);
@@ -149,6 +164,7 @@ if (GITHUB_TOKEN) {
                     weekend > week ? "Weekend Warrior" : "Mid-week Focus",
             };
 
+            // Off-hours from all scanned repos (up to 100)
             let off = 0,
                 total = 0;
             repos.forEach((r: any) => {
@@ -165,23 +181,28 @@ if (GITHUB_TOKEN) {
             });
             if (total > 0) rhythm.offHoursPct = Math.round((off / total) * 100);
         }
-
-        const prs = cc?.totalPullRequestContributions || 0;
-        const reviews = cc?.totalPullRequestReviewContributions || 0;
-        let style = "Independent Craft";
-        const tc = prs + reviews;
-        if (tc > 0)
-            style =
-                reviews / tc > 0.4
-                    ? "Ecosystem Peer"
-                    : prs / tc > 0.8
-                      ? "Autonomous Builder"
-                      : "Balanced Contributor";
-        collab = { style, prs, reviews };
     } catch (err) {
         console.error("GitHub Insights fetch failed, using fallbacks:", err);
     }
 }
+
+// Map color indicators to look exactly like GitHub's dashboard styles
+const getGithubLangColor = (name: string) => {
+    switch (name) {
+        case "Astro":
+            return "bg-[#ff5a03]";
+        case "TypeScript":
+            return "bg-[#3178c6]";
+        case "JavaScript":
+            return "bg-[#f1e05a]";
+        case "CSS":
+            return "bg-[#563d7c]";
+        case "HTML":
+            return "bg-[#e34c26]";
+        default:
+            return "bg-[var(--color-ink-soft)] opacity-60";
+    }
+};
 
 const lastISO = lastCommit ? (lastCommit as Date).toISOString() : "";
 const lastRel = lastCommit
@@ -226,10 +247,11 @@ const lastAbs = lastCommit
                             height="22"
                             viewBox="0 0 24 24"
                             fill="currentColor"
-                            ><path
-                                d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.8 1.7 2.6 1.3.1-.7.4-1.2.7-1.5-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11 11 0 0 1 6 0C18 4.6 19 4.9 19 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"
-                            ></path></svg
                         >
+                            <path
+                                d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.1 2.6 1.3 3.3.9.1-.8.4-1.4.8-1.7-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.4-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11 11 0 0 1 6 0C18 4.6 19 4.9 19 4.9c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"
+                            ></path>
+                        </svg>
                     </div>
                 </div>
 
@@ -237,27 +259,22 @@ const lastAbs = lastCommit
                     class="w-full h-3 bg-[var(--color-paper)] rounded-full overflow-hidden flex mb-6 p-[2px] border border-[var(--color-line)]"
                 >
                     {
-                        languages.map((item, idx) => (
+                        languages.map((item) => (
                             <div
-                                class={`h-full first:rounded-l-full last:rounded-r-full ${idx === 0 ? "bg-[var(--color-coral)]" : idx === 1 ? "bg-[var(--color-cobalt)]" : "bg-[var(--color-ink-soft)] opacity-60"}`}
+                                class={`h-full first:rounded-l-full last:rounded-r-full ${getGithubLangColor(item.name)}`}
                                 style={`width:${item.share}%`}
                             />
                         ))
-                    }
-                    {
-                        languages.length === 0 && (
-                            <div class="h-full w-full bg-[var(--color-ink-soft)] opacity-20" />
-                        )
                     }
                 </div>
 
                 <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                     {
-                        languages.map((item, idx) => (
+                        languages.map((item) => (
                             <li class="flex items-center justify-between text-base border-b border-[var(--color-line)] border-dotted pb-1.5">
                                 <div class="flex items-center gap-2.5">
                                     <span
-                                        class={`w-2 h-2 rounded-full ${idx === 0 ? "bg-[var(--color-coral)]" : idx === 1 ? "bg-[var(--color-cobalt)]" : "bg-[var(--color-ink-soft)] opacity-60"}`}
+                                        class={`w-2 h-2 rounded-full ${getGithubLangColor(item.name)}`}
                                     />
                                     <span class="font-medium text-[var(--color-ink)]">
                                         {item.name}
@@ -269,14 +286,6 @@ const lastAbs = lastCommit
                             </li>
                         ))
                     }
-                    {
-                        languages.length === 0 && (
-                            <li class="font-mono text-sm text-[var(--color-ink-soft)] opacity-60">
-                                No repos visible to this token yet — check the
-                                token's repo access.
-                            </li>
-                        )
-                    }
                 </ul>
             </div>
             <div
@@ -286,12 +295,11 @@ const lastAbs = lastCommit
                     ><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Live
                     API feed</span
                 >
-                <span>🔒 Repo details hidden</span>
+                <span>📊 Raw Linguist metrics</span>
             </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- LAST COMMIT — the live, interactive card -->
             <div
                 id="last-commit"
                 data-iso={lastISO}
@@ -387,7 +395,6 @@ const lastAbs = lastCommit
                 </div>
             </div>
 
-            <!-- COMMIT VELOCITY -->
             <div
                 class="rise [animation-delay:200ms] p-5 rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper-2)] shadow-[0_4px_20px_-4px_rgba(27,23,20,0.03)] hover:shadow-[0_8px_30px_-4px_rgba(27,23,20,0.06)] transition-all duration-500"
             >
@@ -468,7 +475,7 @@ const lastAbs = lastCommit
                 >
                     <span
                         class="font-mono text-[10px] uppercase tracking-wider text-[var(--color-ink-soft)] opacity-75"
-                        >Team Role</span
+                        >Workspace</span
                     >
                     <div class="text-[var(--color-cobalt)] opacity-70">
                         <svg
@@ -479,51 +486,47 @@ const lastAbs = lastCommit
                             fill="none"
                             stroke="currentColor"
                             stroke-width="2"
-                            ><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-                            ></path><circle cx="9" cy="7" r="4"></circle><path
-                                d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
-                            ></path></svg
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            ><polygon points="12 2 2 7 12 12 22 7 12 2"
+                            ></polygon><polyline points="2 17 12 22 22 17"
+                            ></polyline><polyline points="2 12 12 17 22 12"
+                            ></polyline></svg
                         >
                     </div>
                 </div>
                 <span
                     class="font-mono text-[10px] text-[var(--color-ink-soft)] opacity-60"
-                    >Operational Profile</span
+                    >Architecture Target</span
                 >
                 <p
                     class="font-display text-xl font-bold text-[var(--color-ink)] leading-tight"
                 >
-                    {collab.style}
+                    Ecosystem Stack
                 </p>
-                <div class="flex gap-2 mt-4">
-                    <div
-                        class="flex-1 bg-[var(--color-paper)] border border-[var(--color-line)] rounded-lg px-2 py-1.5 text-center"
-                    >
-                        <span
-                            class="block text-[8px] font-mono text-[var(--color-ink-soft)] opacity-50 uppercase tracking-wider"
-                            >PRs</span
-                        >
-                        <span
-                            class="text-base font-display font-bold text-[var(--color-coral)]"
-                            >{collab.prs}</span
-                        >
-                    </div>
-                    <div
-                        class="flex-1 bg-[var(--color-paper)] border border-[var(--color-line)] rounded-lg px-2 py-1.5 text-center"
-                    >
-                        <span
-                            class="block text-[8px] font-mono text-[var(--color-ink-soft)] opacity-50 uppercase tracking-wider"
-                            >Reviews</span
-                        >
-                        <span
-                            class="text-base font-display font-bold text-[var(--color-cobalt)]"
-                            >{collab.reviews}</span
-                        >
-                    </div>
+
+                <div class="flex flex-col gap-1.5 mt-3">
+                    {
+                        coreStack.map((tech) => (
+                            <div class="flex items-center justify-between border-b border-[var(--color-line)]/40 border-dotted pb-1 text-[11px]">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-[var(--color-ink)]">
+                                        {tech.engine}
+                                    </span>
+                                    <span class="text-[9px] text-[var(--color-ink-soft)] opacity-60 leading-none">
+                                        {tech.role}
+                                    </span>
+                                </div>
+                                <span class="font-mono text-[9px] font-medium text-[var(--color-cobalt)]">
+                                    {tech.spec}
+                                </span>
+                            </div>
+                        ))
+                    }
                 </div>
                 <span
                     class="font-mono text-[9px] text-[var(--color-ink-soft)] opacity-50 mt-auto pt-3 text-center"
-                    >{YEAR} account-wide interactions</span
+                    >Active monorepo toolchains</span
                 >
             </div>
         </div>
@@ -584,6 +587,6 @@ const lastAbs = lastCommit
             relEl.textContent = relTime(from);
         };
         tick();
-        setInterval(tick, 20000); 
+        setInterval(tick, 20000);
     }
 </script>
