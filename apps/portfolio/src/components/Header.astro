@@ -7,9 +7,11 @@ const links = [
 ];
 ---
 
-<header class="sticky top-0 z-50 border-b border-line/70 bg-paper/80 backdrop-blur-md">
+<header
+  class="sticky top-0 z-50 border-b border-line/70 bg-paper/80 backdrop-blur-md"
+>
   <nav
-    class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4"
+    class="relative mx-auto flex max-w-5xl items-center justify-between px-6 py-4"
     aria-label="Primary"
   >
     <a
@@ -19,23 +21,71 @@ const links = [
       bljeona<span class="text-coral">.</span>
     </a>
 
-    <ul class="hidden items-center gap-8 text-sm font-medium text-ink-soft sm:flex">
-      {
-        links.map((link) => (
-          <li>
-            <a href={link.href} class="link-grow transition-colors hover:text-ink">
-              {link.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    <input type="checkbox" id="portfolio-menu-toggle" class="peer hidden" />
 
-<!--     <a
-      href="https://hub.bljeona.com"
-      class="rounded-full border-2 border-ink bg-ink px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-paper transition-transform hover:-translate-y-0.5"
+    <div
+      class="absolute top-full left-0 right-0 z-40 max-h-0 w-full overflow-hidden border-b border-line/0 bg-paper/95 px-6 opacity-0 backdrop-blur-md transition-all duration-300 peer-checked:max-h-80 peer-checked:border-line/70 peer-checked:py-6 peer-checked:opacity-100 sm:static sm:z-auto sm:max-h-none sm:w-auto sm:overflow-visible sm:border-none sm:bg-transparent sm:px-0 sm:opacity-100"
     >
-      AltSource Hub ↗
-    </a> -->
+      <ul
+        class="flex flex-col gap-5 text-base font-medium text-ink-soft sm:flex-row sm:items-center sm:gap-8 sm:text-sm"
+      >
+        {
+          links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="link-grow block py-1 transition-colors hover:text-ink sm:py-0"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+        <li class="mt-2 pt-4 border-t border-line/40 sm:hidden">
+          <a
+            href="https://hub.bljeona.com"
+            class="inline-block w-full text-center rounded-full border-2 border-ink bg-ink px-4 py-2 font-mono text-xs uppercase tracking-wider text-paper transition-transform"
+          >
+            AltSource Hub ↗
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex items-center">
+      <a
+        href="https://hub.bljeona.com"
+        class="hidden rounded-full border-2 border-ink bg-ink px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-paper transition-transform hover:-translate-y-0.5 sm:inline-block"
+      >
+        AltSource Hub ↗
+      </a>
+
+      <label
+        for="portfolio-menu-toggle"
+        class="flex h-5 w-6 cursor-pointer flex-col justify-between text-ink sm:hidden"
+        aria-label="Toggle menu"
+      >
+        <span
+          class="h-0.5 w-full bg-current transition-all duration-300 origin-left"
+        ></span>
+        <span class="h-0.5 w-full bg-current transition-all duration-300"
+        ></span>
+        <span
+          class="h-0.5 w-full bg-current transition-all duration-300 origin-left"
+        ></span>
+      </label>
+    </div>
   </nav>
 </header>
+
+<style>
+  #portfolio-menu-toggle:checked ~ div label span:nth-child(1) {
+    transform: rotate(45deg) translate(2px, -1px);
+  }
+  #portfolio-menu-toggle:checked ~ div label span:nth-child(2) {
+    opacity: 0;
+  }
+  #portfolio-menu-toggle:checked ~ div label span:nth-child(3) {
+    transform: rotate(-45deg) translate(2px, 1px);
+  }
+</style>

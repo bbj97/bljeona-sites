@@ -9,38 +9,74 @@ const links = [
   class="sticky top-0 z-50 border-b border-line/70 bg-paper/90 backdrop-blur-md"
 >
   <nav
-    class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4"
+    class="mx-auto flex max-w-6xl flex-wrap items-center justify-between px-6 py-4"
     aria-label="Primary"
   >
     <a
       href="/"
-      class="font-display text-2xl font-semibold tracking-tight text-ink"
+      class="font-display text-2xl font-semibold tracking-tight text-ink z-50"
     >
       AltSource <span class="text-coral">Hub</span>
     </a>
 
-    <ul
-      class="hidden items-center gap-8 text-sm font-medium text-ink-soft md:flex"
+    <input type="checkbox" id="menu-toggle" class="peer hidden" />
+
+    <label
+      for="menu-toggle"
+      class="flex h-6 w-6 cursor-pointer flex-col justify-between md:hidden z-50 text-ink"
+      aria-label="Toggle menu"
     >
-      {
-        links.map((link) => (
-          <li>
-            <a
-              href={link.href}
-              class="link-grow transition-colors hover:text-ink"
-            >
-              {link.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+      <span class="h-0.5 w-full bg-current transition-all duration-300 origin-left peer-checked:rotate-45"></span>
+      <span class="h-0.5 w-full bg-current transition-all duration-300 peer-checked:opacity-0"></span>
+      <span class="h-0.5 w-full bg-current transition-all duration-300 origin-left peer-checked:-rotate-45"></span>
+    </label>
+
+    <div
+      class="fixed inset-0 top-0 left-0 z-40 hidden h-screen w-screen bg-paper/95 p-6 pt-24 transition-all peer-checked:block md:static md:z-auto md:block md:h-auto md:w-auto md:bg-transparent md:p-0"
+    >
+      <ul
+        class="flex flex-col gap-8 text-xl font-medium text-ink-soft md:flex-row md:items-center md:text-sm"
+      >
+        {
+          links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="link-grow block py-2 transition-colors hover:text-ink md:py-0"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+        <li class="mt-4 md:hidden">
+          <a
+            href="https://github.com/bbj97"
+            class="inline-block rounded-full border border-line bg-panel px-6 py-3 font-mono text-sm uppercase tracking-wider text-ink transition-colors hover:border-coral hover:text-coral"
+          >
+            GitHub ↗
+          </a>
+        </li>
+      </ul>
+    </div>
 
     <a
       href="https://github.com/bbj97"
-      class="rounded-full border border-line bg-panel px-4 py-2 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:border-coral hover:text-coral"
+      class="hidden rounded-full border border-line bg-panel px-4 py-2 font-mono text-xs uppercase tracking-wider text-ink transition-colors hover:border-coral hover:text-coral md:inline-block"
     >
       GitHub ↗
     </a>
   </nav>
 </header>
+
+<style>
+  #menu-toggle:checked ~ label span:nth-child(1) {
+    transform: rotate(45deg) translate(2px, -1px);
+  }
+  #menu-toggle:checked ~ label span:nth-child(2) {
+    opacity: 0;
+  }
+  #menu-toggle:checked ~ label span:nth-child(3) {
+    transform: rotate(-45deg) translate(2px, 1px);
+  }
+</style>
