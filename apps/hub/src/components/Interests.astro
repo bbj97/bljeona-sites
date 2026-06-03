@@ -1,0 +1,119 @@
+---
+// src/components/Interests.astro
+// Clean, fully static editorial layout with zero interactive gimmicks.
+
+const manifestProfile = {
+  "identity": {
+    "handle": "Bljeona",
+    "role": "Creative Developer",
+    "coordinates": "48.1351° N, 11.5820° E"
+  },
+  "activeExploration": {
+    "vector": "LLM Hallucination Logits",
+    "coreQuestion": "How to mathematically detect an AI lying in real-time?",
+    "telemetry": ["Log-prob tracking", "Logit bias cross-examination", "Temperature stepping"]
+  },
+  "runtime": {
+    "computation": "Local Client-Memory",
+    "serverOverhead": "$0.00 / month",
+    "blueprint": "Decoupled SSG + Vanilla API"
+  }
+};
+
+const jsonString = JSON.stringify(manifestProfile, null, 2);
+---
+
+<section class="mx-auto max-w-6xl px-6 py-20 md:py-28 border-t border-line" aria-labelledby="interests-title">
+  <div class="mb-14">
+    <p class="font-mono text-xs uppercase tracking-[0.28em] text-coral">
+      Beyond the IDE
+    </p>
+    <h2 id="interests-title" class="mt-2 font-display text-3xl font-semibold text-ink tracking-tight sm:text-4xl">
+      Interests & Architecture
+    </h2>
+  </div>
+
+  <div class="border border-line rounded-sm overflow-hidden bg-panel/30">
+    
+    <div class="flex items-center justify-between px-4 py-3 border-b border-line bg-ink/[0.02]">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full border border-line bg-coral/20"></span>
+          <span class="w-2 h-2 rounded-full border border-line bg-ink-soft/10"></span>
+          <span class="w-2 h-2 rounded-full border border-line bg-ink-soft/5"></span>
+        </div>
+        <span class="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-soft font-semibold">System Diagnostics</span>
+      </div>
+      <div class="font-mono text-[9px] text-ink-soft uppercase tracking-wider">
+        Profile System
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-line">
+      
+      <div class="lg:col-span-5 p-6 flex flex-col justify-between space-y-8">
+        
+        <div class="space-y-4">
+          <div class="font-mono text-[11px] uppercase tracking-wider text-ink-soft font-medium">Telemetry Insights</div>
+          
+          <div class="grid grid-cols-1 gap-3.5">
+            <div class="border border-coral/20 p-4 bg-coral/[0.01] rounded-sm flex flex-col gap-1">
+              <span class="font-mono text-[9px] uppercase tracking-wider text-coral font-bold">01 / Active R&D Focus</span>
+              <p class="font-display text-sm font-medium text-ink leading-snug">
+                Maxing out model token limitations to engineer real-time AI lie & hallucination detection vectors.
+              </p>
+            </div>
+            
+            <div class="border border-line p-4 bg-panel rounded-sm flex flex-col gap-1">
+              <span class="font-mono text-[9px] uppercase tracking-wider text-ink-soft">02 / Utility Philosophy</span>
+              <p class="font-sans text-xs text-ink-soft leading-relaxed">
+                Building custom tools my non-technical friends text me to ask for—delivered in the simplest, completely <span class="text-ink font-medium">kostenlos</span> way possible.
+              </p>
+            </div>
+            
+            <div class="border border-line p-4 bg-panel rounded-sm flex flex-col gap-1">
+              <span class="font-mono text-[9px] uppercase tracking-wider text-ink-soft">03 / Fine Arts</span>
+              <p class="font-sans text-xs text-ink-soft leading-relaxed">
+                Painting physical canvas textures to ground digital logic. FYI this is my way of turning off the computer and "touching the grass".
+              </p>
+            </div>
+
+            <div class="border border-line p-4 bg-panel rounded-sm flex flex-col gap-1">
+              <span class="font-mono text-[9px] uppercase tracking-wider text-ink-soft">04 / Kinetics</span>
+              <p class="font-sans text-xs text-ink-soft leading-relaxed">
+                I play tennis and the wannabe-tennis (ifykyk). Mini-golf is on my "to try" list too.
+              </p>
+            </div>
+          </div>
+        </div>
+
+<div class="pt-5 border-t border-line space-y-2">
+  <h4 class="font-mono text-[10px] uppercase tracking-widest text-coral font-bold">AltSource Hub</h4>
+  <p class="font-body text-xs text-ink-soft leading-relaxed">
+    My personal hub. To be honest, it’s still completely unfinished, but it looks incredibly cute and clean so that's why I shared it. Plus, my boyfriend literally needs the timetracker to survive his work week, so here we are. Low-maintenance utilities left completely alone in their cozy browser tabs.
+  </p>
+</div>
+
+      </div>
+
+      <div class="lg:col-span-7 p-6 bg-ink/[0.01] flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="font-mono text-[11px] uppercase tracking-wider text-ink-soft font-medium">manifest.json</div>
+            <span class="font-mono text-[9px] text-ink-soft/40 select-none">UTF-8 // JSON-Object</span>
+          </div>
+          
+          <div>
+            <pre class="font-mono text-[11px] text-ink overflow-x-auto leading-relaxed bg-panel p-5 border border-line rounded-sm select-all selection:bg-coral/20"><code class="block whitespace-pre">{jsonString}</code></pre>
+          </div>
+        </div>
+
+        <div class="pt-5 border-line space-y-2">
+          <h4 class="font-mono text-[10px] uppercase tracking-widest text-coral font-bold">Whats new?</h4>
+          <p class="font-body text-xs text-ink-soft leading-relaxed">
+            My active research right now is 5% architectural strategy and 95% a TikTok doomscroll about Claude AI, courtesy of an algorithm that won't let me forget the time I googled 'Claude vs Gemini'. Its fun tho. Also, AltSource hub, is for Alternative Sources that are free, like my ColorsHub. 
+        </p>
+        </div>
+    </div>
+  </div>
+</section>

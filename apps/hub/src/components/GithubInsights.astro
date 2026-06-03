@@ -27,7 +27,6 @@ let velocity = {
     dayPreference: "Mid-week Focus",
 };
 
-// Clean ecosystem cards replacing the empty Team Role counter
 let coreStack = [
     { engine: "Astro", role: "Static Generation", spec: "Island Architecture" },
     { engine: "React", role: "Component Tree", spec: "UI Micro-states" },
@@ -98,11 +97,10 @@ if (GITHUB_TOKEN) {
         const json = await response.json();
         const u = json?.data?.user;
         const cc = u?.contributionsCollection;
-        const repos = u?.repositories?.nodes || []; // up to 100 (widgets)
-        const langRepos = repos.slice(0, LANG_REPO_LIMIT); // first 20 (codebase engine)
+        const repos = u?.repositories?.nodes || [];
+        const langRepos = repos.slice(0, LANG_REPO_LIMIT);
         scanned = repos.length;
 
-        // --- Codebase engine: languages from the most recent 20 repos only ---
         const langTotals: Record<string, number> = {};
         let totalBytes = 0;
 
@@ -118,14 +116,13 @@ if (GITHUB_TOKEN) {
             languages = Object.entries(langTotals)
                 .map(([name, bytes]) => ({
                     name,
-                    share: Number(((bytes / totalBytes) * 100).toFixed(1)), // Accurate decimal formatting
+                    share: Number(((bytes / totalBytes) * 100).toFixed(1)),
                 }))
                 .filter((l) => l.share > 0.1)
                 .sort((a, b) => b.share - a.share)
-                .slice(0, 6); // Expanded slice to ensure Astro isn't dropped due to lockfiles
+                .slice(0, 6);
         }
 
-        // --- Other widgets: last commit across all scanned repos (up to 100) ---
         repos.forEach((r: any) => {
             r.defaultBranchRef?.target?.history?.nodes?.forEach((c: any) => {
                 const dt = new Date(c.committedDate);
@@ -164,7 +161,6 @@ if (GITHUB_TOKEN) {
                     weekend > week ? "Weekend Warrior" : "Mid-week Focus",
             };
 
-            // Off-hours from all scanned repos (up to 100)
             let off = 0,
                 total = 0;
             repos.forEach((r: any) => {
@@ -186,7 +182,6 @@ if (GITHUB_TOKEN) {
     }
 }
 
-// Map color indicators to look exactly like GitHub's dashboard styles
 const getGithubLangColor = (name: string) => {
     switch (name) {
         case "Astro":
