@@ -1,91 +1,2251 @@
----
-const links = [
-  { href: "#about", label: "About" },
-  { href: "#skills", label: "Skills" },
-  { href: "#work", label: "Work" },
-  { href: "#contact", label: "Contact" },
-];
----
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Zeit" />
+    <meta name="theme-color" content="#DC052D" />
+    <title>Zeiterfassung</title>
+    <style is:inline>
+      :root {
+        --red: #dc052d;
+        --red-dk: #b00424;
+        --navy: #0c2340;
+        --navy-2: #16335c; 
+        --bg: #f4f6fb;
+        --card: #ffffff;
+        --ink: #0c2340;
+        --muted: #6b7791;
+        --line: #e6eaf2;
+        --green: #1a8a4a;
+        --green-bg: #e6f5ec;
+        --red-bg: #fde7eb;
+        --shadow: 0 6px 24px rgba(12, 35, 64, 0.08);
+        --shadow-lg: 0 12px 40px rgba(12, 35, 64, 0.16);
+        --r: 18px;
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+        overscroll-behavior-y: none;
+      }
+      .tnum {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+      }
+      input,
+      select {
+        font-family: inherit;
+        font-size: 16px;
+      }
 
-<header
-  class="sticky top-0 z-50 border-b border-line/70 bg-paper/80 backdrop-blur-md"
->
-  <nav
-    class="relative mx-auto flex max-w-5xl items-center justify-between px-6 py-4"
-    aria-label="Primary"
-  >
-    <a
-      href="#top"
-      class="font-display text-2xl font-black italic tracking-tight text-ink"
-    >
-      bljeona<span class="text-coral">.</span>
-    </a>
+      #app {
+        max-width: 520px;
+        margin: 0 auto;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: calc(78px + var(--safe-bottom));
+      }
 
-    <input type="checkbox" id="portfolio-menu-toggle" class="peer hidden" />
+      header.top {
+        background: linear-gradient(155deg, var(--red) 0%, var(--red-dk) 100%);
+        padding: calc(18px + var(--safe-top)) 20px 22px;
+        color: #fff;
+        border-radius: 0 0 26px 26px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+      header.top::after {
+        content: "";
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.07);
+      }
+      header.top::before {
+        content: "";
+        position: absolute;
+        left: -30px;
+        bottom: -60px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: rgba(12, 35, 64, 0.18);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        font-size: 15px;
+        opacity: 0.95;
+        position: relative;
+      }
+      .brand .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+      }
+      .bal-wrap {
+        margin-top: 14px;
+        position: relative;
+      }
+      .bal-label {
+        font-size: 12.5px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        opacity: 0.85;
+        font-weight: 700;
+      }
+      .bal-num {
+        font-size: 52px;
+        font-weight: 800;
+        line-height: 1;
+        margin-top: 4px;
+        letter-spacing: -1px;
+      }
+      .bal-sub {
+        font-size: 13px;
+        opacity: 0.9;
+        margin-top: 7px;
+        font-weight: 500;
+      }
+      .bal-pill {
+        display: inline-block;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.16);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 600;
+      }
 
-    <div
-      class="absolute top-full left-0 right-0 z-40 max-h-0 w-full overflow-hidden border-b border-line/0 bg-paper/95 px-6 opacity-0 backdrop-blur-md transition-all duration-300 peer-checked:max-h-80 peer-checked:border-line/70 peer-checked:py-6 peer-checked:opacity-100 sm:static sm:z-auto sm:max-h-none sm:w-auto sm:overflow-visible sm:border-none sm:bg-transparent sm:px-0 sm:opacity-100"
-    >
-      <ul
-        class="flex flex-col gap-5 text-base font-medium text-ink-soft sm:flex-row sm:items-center sm:gap-8 sm:text-sm"
-      >
-        {
-          links.map((link) => (
-            <li>
-              <a
-                href={link.href}
-                class="link-grow block py-1 transition-colors hover:text-ink sm:py-0"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))
+      main {
+        flex: 1;
+        padding: 18px 16px 6px;
+      }
+      .view {
+        display: none;
+        animation: fade 0.25s ease;
+      }
+      .view.active {
+        display: block;
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
         }
-        <li class="mt-2 pt-4 border-t border-line/40 sm:hidden">
-          <a
-            href="https://hub.bljeona.com"
-            class="inline-block w-full text-center rounded-full border-2 border-ink bg-ink px-4 py-2 font-mono text-xs uppercase tracking-wider text-paper transition-transform"
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: var(--r);
+        box-shadow: var(--shadow);
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+      .card h2 {
+        margin: 0 0 2px;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+      }
+      .card .sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 14px;
+      }
+
+      .daychip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--navy);
+        color: #fff;
+        padding: 7px 13px;
+        border-radius: 14px;
+        font-size: 13.5px;
+        font-weight: 600;
+      }
+
+      .hours-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 6px 0 4px;
+      }
+      .step {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        background: var(--bg);
+        color: var(--navy);
+        font-size: 26px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid var(--line);
+        transition: 0.12s;
+      }
+      .step:active {
+        transform: scale(0.92);
+        background: var(--line);
+      }
+      .hours-val {
+        flex: 1;
+        text-align: center;
+      }
+      .hours-val input {
+        width: 100%;
+        border: none;
+        text-align: center;
+        font-size: 46px;
+        font-weight: 800;
+        color: var(--navy);
+        background: transparent;
+        letter-spacing: -1px;
+        outline: none;
+      }
+      .hours-val .u {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: -4px;
+      }
+
+      .note-in {
+        width: 100%;
+        border: 1.5px solid var(--line);
+        border-radius: 14px;
+        padding: 13px 14px;
+        font-size: 15px;
+        color: var(--ink);
+        margin-top: 6px;
+        background: #fcfdff;
+        resize: none;
+        outline: none;
+        transition: 0.15s;
+      }
+      .note-in:focus {
+        border-color: var(--red);
+        background: #fff;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 16px;
+        border-radius: 15px;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        transition: 0.12s;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn-primary {
+        background: var(--red);
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(220, 5, 45, 0.32);
+      }
+      .btn-navy {
+        background: var(--navy);
+        color: #fff;
+      }
+      .btn-ghost {
+        background: var(--bg);
+        color: var(--navy);
+        border: 1.5px solid var(--line);
+      }
+      .btn-sm {
+        padding: 12px;
+        font-size: 14.5px;
+      }
+
+      .types {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin-top: 4px;
+      }
+      .tbtn {
+        padding: 14px 10px;
+        border-radius: 14px;
+        background: var(--bg);
+        border: 1.5px solid var(--line);
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--navy);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        transition: 0.12s;
+      }
+      .tbtn .ic {
+        font-size: 20px;
+      }
+      .tbtn:active {
+        transform: scale(0.96);
+      }
+      .tbtn.sel {
+        border-color: var(--red);
+        background: var(--red-bg);
+        color: var(--red-dk);
+      }
+
+      .status-banner {
+        padding: 14px 16px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 14.5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .status-banner.holiday {
+        background: #eef4ff;
+        color: var(--navy-2);
+      }
+      .status-banner.weekend {
+        background: #f0f1f5;
+        color: var(--muted);
+      }
+      .status-banner .ic {
+        font-size: 20px;
+      }
+
+      /* month list */
+      .month-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+      .month-nav button {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: var(--card);
+        box-shadow: var(--shadow);
+        font-size: 20px;
+        color: var(--navy);
+        font-weight: 700;
+      }
+      .month-nav .mlabel {
+        font-weight: 800;
+        font-size: 17px;
+      }
+      .msum {
+        display: flex;
+        gap: 9px;
+        margin-bottom: 14px;
+      }
+      .msum .box {
+        flex: 1;
+        background: var(--card);
+        border-radius: 14px;
+        padding: 12px;
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+      .msum .box .n {
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      .msum .box .l {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+
+      .daylist {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .dayrow {
+        background: var(--card);
+        border-radius: 14px;
+        padding: 13px 15px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        transition: 0.12s;
+      }
+      .dayrow:active {
+        transform: scale(0.99);
+      }
+      .dayrow .date {
+        width: 46px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .dayrow .date .d {
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .dayrow .date .w {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+      .dayrow .mid {
+        flex: 1;
+        min-width: 0;
+      }
+      .dayrow .mid .t {
+        font-weight: 700;
+        font-size: 14.5px;
+      }
+      .dayrow .mid .nt {
+        font-size: 12.5px;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 1px;
+      }
+      .dayrow .delta {
+        font-weight: 800;
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+      .dayrow.wknd {
+        opacity: 0.55;
+        box-shadow: none;
+        background: transparent;
+      }
+      .dayrow.wknd .date .d {
+        font-weight: 600;
+      }
+      .pos {
+        color: var(--green);
+      }
+      .neg {
+        color: var(--red);
+      }
+      .zero {
+        color: var(--muted);
+      }
+      .tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 8px;
+        margin-left: 2px;
+      }
+      .tag.h {
+        background: #eef4ff;
+        color: var(--navy-2);
+      }
+
+      .field {
+        margin-bottom: 16px;
+      }
+      .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 7px;
+      }
+      .field input[type="number"],
+      .field input[type="date"],
+      .field input[type="text"] {
+        width: 100%;
+        border: 1.5px solid var(--line);
+        border-radius: 13px;
+        padding: 13px 14px;
+        background: #fcfdff;
+        color: var(--ink);
+        outline: none;
+        font-weight: 600;
+      }
+      .field input:focus {
+        border-color: var(--red);
+      }
+      .wdays {
+        display: flex;
+        gap: 6px;
+      }
+      .wd {
+        flex: 1;
+        padding: 11px 0;
+        text-align: center;
+        border-radius: 11px;
+        background: var(--bg);
+        border: 1.5px solid var(--line);
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--muted);
+        transition: 0.12s;
+      }
+      .wd.on {
+        background: var(--navy);
+        color: #fff;
+        border-color: var(--navy);
+      }
+
+      nav.bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border-top: 1px solid var(--line);
+        display: flex;
+        padding: 8px 0 calc(8px + var(--safe-bottom));
+        max-width: 520px;
+        margin: 0 auto;
+        box-shadow: 0 -4px 20px rgba(12, 35, 64, 0.06);
+      }
+      nav.bottom button {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 0;
+      }
+      nav.bottom button .ic {
+        font-size: 21px;
+      }
+      nav.bottom button.on {
+        color: var(--red);
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: calc(94px + var(--safe-bottom));
+        transform: translateX(-50%) translateY(20px);
+        background: var(--navy);
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 14px;
+        opacity: 0;
+        transition: 0.25s;
+        z-index: 50;
+        box-shadow: var(--shadow-lg);
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        z-index: 100;
+        display: none;
+        flex-direction: column;
+        padding: calc(40px + var(--safe-top)) 22px 30px;
+        overflow-y: auto;
+      }
+      .overlay.show {
+        display: flex;
+      }
+      .overlay .logo {
+        font-size: 30px;
+        font-weight: 800;
+        color: var(--red);
+        letter-spacing: -0.5px;
+      }
+      .overlay .tagline {
+        color: var(--muted);
+        font-size: 15px;
+        margin: 6px 0 26px;
+        line-height: 1.5;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .greeting {
+        font-size: 13px;
+        opacity: 0.92;
+        font-weight: 600;
+        margin-top: 10px;
+        position: relative;
+      }
+
+      .back-btn {
+        background: var(--bg);
+        color: var(--navy);
+        font-weight: 800;
+        font-size: 14px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        margin-bottom: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: 0.12s;
+      }
+      .back-btn:active {
+        transform: scale(0.97);
+        background: var(--line);
+      }
+
+      .leave-done {
+        background: var(--green-bg);
+        border-radius: 16px;
+        padding: 18px;
+        text-align: center;
+      }
+      .leave-done .big {
+        font-size: 34px;
+        line-height: 1;
+      }
+      .leave-done .lt {
+        font-weight: 800;
+        font-size: 18px;
+        color: var(--green);
+        margin-top: 8px;
+      }
+      .leave-done .sm {
+        font-size: 13px;
+        color: #3a6b4d;
+        margin-top: 4px;
+        font-weight: 600;
+      }
+      .leave-done .acts {
+        display: flex;
+        gap: 9px;
+        margin-top: 14px;
+      }
+      .leave-done .acts .btn {
+        margin: 0;
+      }
+
+      .range-btn {
+        width: 100%;
+        margin-top: 12px;
+        padding: 14px;
+        border-radius: 14px;
+        background: var(--navy);
+        color: #fff;
+        font-weight: 800;
+        font-size: 14.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: 0.12s;
+      }
+      .range-btn:active {
+        transform: scale(0.98);
+      }
+
+      .sheet-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(12, 35, 64, 0.45);
+        z-index: 80;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.22s;
+      }
+      .sheet-bg.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .sheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        max-width: 520px;
+        margin: 0 auto;
+        background: var(--card);
+        border-radius: 24px 24px 0 0;
+        z-index: 81;
+        padding: 8px 20px calc(24px + var(--safe-bottom));
+        transform: translateY(110%);
+        transition: 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+        box-shadow: var(--shadow-lg);
+      }
+      .sheet.show {
+        transform: translateY(0);
+      }
+      .sheet .grab {
+        width: 42px;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--line);
+        margin: 8px auto 14px;
+      }
+      .sheet h2 {
+        margin: 0 0 4px;
+        font-size: 19px;
+        font-weight: 800;
+      }
+      .sheet .sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+      .daterow {
+        display: flex;
+        gap: 10px;
+      }
+      .daterow .field {
+        flex: 1;
+      }
+      .seg {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .seg button {
+        padding: 13px 8px;
+        border-radius: 13px;
+        background: var(--bg);
+        border: 1.5px solid var(--line);
+        font-weight: 700;
+        font-size: 13.5px;
+        color: var(--navy);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        transition: 0.12s;
+      }
+      .seg button .ic {
+        font-size: 18px;
+      }
+      .seg button.sel {
+        border-color: var(--red);
+        background: var(--red-bg);
+        color: var(--red-dk);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay" id="setup">
+      <div class="logo">Willkommen 👋</div>
+      <div class="tagline">
+        Kurz einrichten – danach trackst du deinen Tag mit zwei Fingertipps.
+        Alle Daten bleiben auf deinem Gerät.
+      </div>
+
+      <div class="card">
+        <div class="daterow">
+          <div class="field">
+            <label>Vorname</label><input
+              type="text"
+              id="su-first"
+              placeholder="Vorname"
+            />
+          </div>
+          <div class="field">
+            <label>Nachname</label><input
+              type="text"
+              id="su-last"
+              placeholder="Nachname"
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label>Sollstunden pro Tag</label>
+          <input
+            type="number"
+            id="su-target"
+            value="8"
+            step="0.5"
+            min="1"
+            max="14"
+          />
+        </div>
+        <div class="field">
+          <label>Arbeitstage</label>
+          <div class="wdays" id="su-wdays"></div>
+        </div>
+        <div class="field">
+          <label>Start ab (heute)</label>
+          <input type="date" id="su-date" />
+        </div>
+        <div class="field">
+          <label>Aktueller Saldo (Stunden +/−)</label>
+          <input type="number" id="su-bal" value="0" step="0.25" />
+        </div>
+      </div>
+      <button class="btn btn-primary" id="su-go">Los geht's</button>
+    </div>
+
+    <div id="app" class="hidden">
+      <header class="top">
+        <div class="brand"><span class="dot"></span> ZEITERFASSUNG</div>
+        <div class="greeting" id="greeting"></div>
+        <div class="bal-wrap">
+          <div class="bal-label">Gesamtsaldo</div>
+          <div class="bal-num tnum" id="balNum">±0,0 h</div>
+          <div class="bal-sub" id="balSub">Überstunden &amp; Minusstunden</div>
+          <div class="bal-pill" id="balPill"></div>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" id="view-heute">
+          <div class="card">
+            <button id="backBtn" class="back-btn hidden"
+              >‹ Zurück zum Monat</button
+            >
+            <div
+              style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;"
+            >
+              <div>
+                <h2 id="todayTitle">Heute</h2>
+                <div class="sub" id="todayDate" style="margin:0;"></div>
+              </div>
+              <div class="daychip" id="todayChip">Arbeit</div>
+            </div>
+
+            <div id="autoBanner"></div>
+
+            <div id="leaveConfirm" class="hidden"></div>
+
+            <div id="workBlock">
+              <div class="hours-row">
+                <button class="step" id="minus">−</button>
+                <div class="hours-val">
+                  <input
+                    type="number"
+                    id="hoursInput"
+                    value="8"
+                    step="0.25"
+                    min="0"
+                    max="24"
+                    inputmode="decimal"
+                  />
+                  <div class="u">Stunden</div>
+                </div>
+                <button class="step" id="plus">+</button>
+              </div>
+              <textarea
+                class="note-in"
+                id="noteInput"
+                rows="2"
+                placeholder="Kommentar (optional) – z. B. Projekt, Termin…"
+              ></textarea>
+              <button
+                class="btn btn-primary btn-sm"
+                id="saveWork"
+                style="margin-top:10px;">Speichern</button
+              >
+            </div>
+
+            <div id="typeSection" style="margin-top:16px;">
+              <div class="sub" style="margin-bottom:9px;">
+                Oder als ganzen Tag eintragen:
+              </div>
+              <div class="types" id="typeBtns">
+                <button class="tbtn" data-type="urlaub"
+                  ><span class="ic">🏖️</span>Urlaub</button
+                >
+                <button class="tbtn" data-type="krank"
+                  ><span class="ic">🤒</span>Krank</button
+                >
+                <button class="tbtn" data-type="frei"
+                  ><span class="ic">📅</span>Freier Tag</button
+                >
+                <button class="tbtn" data-type="sonderurlaub"
+                  ><span class="ic">⭐</span>Sonderurlaub</button
+                >
+              </div>
+              <button class="range-btn" id="openRange"
+                ><span>📆</span> Mehrere Tage / Zeitraum eintragen</button
+              >
+            </div>
+
+            <button
+              class="btn btn-ghost btn-sm hidden"
+              id="clearDay"
+              style="margin-top:12px;">Eintrag löschen</button
+            >
+          </div>
+        </section>
+
+        <section class="view" id="view-monat">
+          <div class="month-nav">
+            <button id="mPrev">‹</button>
+            <div class="mlabel" id="mLabel"></div>
+            <button id="mNext">›</button>
+          </div>
+          <div class="msum">
+            <div class="box">
+              <div class="n tnum" id="mHours">0</div><div class="l">
+                Stunden
+              </div>
+            </div>
+            <div class="box">
+              <div class="n tnum" id="mDelta">±0</div><div class="l">
+                Saldo Monat
+              </div>
+            </div>
+            <div class="box">
+              <div class="n tnum" id="mDays">0</div><div class="l">Tage</div>
+            </div>
+          </div>
+          <div class="daylist" id="dayList"></div>
+        </section>
+
+        <section class="view" id="view-mehr">
+          <div class="card">
+            <h2>Einstellungen</h2>
+            <div class="sub">
+              Änderungen wirken sich sofort auf die Berechnung aus.
+            </div>
+            <div class="daterow">
+              <div class="field">
+                <label>Vorname</label><input
+                  type="text"
+                  id="se-first"
+                  placeholder="Vorname"
+                />
+              </div>
+              <div class="field">
+                <label>Nachname</label><input
+                  type="text"
+                  id="se-last"
+                  placeholder="Nachname"
+                />
+              </div>
+            </div>
+            <div class="field">
+              <label>Sollstunden pro Tag</label>
+              <input type="number" id="se-target" step="0.5" min="1" max="14" />
+            </div>
+            <div class="field">
+              <label>Arbeitstage</label>
+              <div class="wdays" id="se-wdays"></div>
+            </div>
+            <div class="field">
+              <label>Start ab</label>
+              <input type="date" id="se-date" />
+            </div>
+            <div class="field">
+              <label>Anfangssaldo (Stunden +/−)</label>
+              <input type="number" id="se-bal" step="0.25" />
+            </div>
+            <button class="btn btn-navy btn-sm" id="se-save"
+              >Einstellungen speichern</button
+            >
+          </div>
+
+          <div class="card">
+            <h2>Export</h2>
+            <div class="sub">
+              Erstellt eine Excel-Datei (.xlsx) mit getrennten Tabellen – bereit
+              zum Senden an den Arbeitgeber.
+            </div>
+            <button class="btn btn-primary btn-sm" id="exportBtn"
+              >📊 Excel exportieren</button
+            >
+          </div>
+
+          <div class="card">
+            <h2>Daten</h2>
+            <div class="sub">
+              Alles wird nur lokal auf diesem Gerät gespeichert.
+            </div>
+            <button
+              class="btn btn-ghost btn-sm"
+              id="resetBtn"
+              style="color:var(--red);">Alle Daten zurücksetzen</button
+            >
+          </div>
+        </section>
+      </main>
+
+      <nav class="bottom">
+        <button data-view="heute" class="on"
+          ><span class="ic">⏱️</span>Heute</button
+        >
+        <button data-view="monat"><span class="ic">📆</span>Monat</button>
+        <button data-view="mehr"><span class="ic">⚙️</span>Mehr</button>
+      </nav>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="sheet-bg" id="sheetBg"></div>
+    <div class="sheet" id="rangeSheet">
+      <div class="grab"></div>
+      <h2>Zeitraum eintragen</h2>
+      <div class="sub">
+        Für Urlaub, Krankheit usw. – Wochenenden und Feiertage werden
+        automatisch übersprungen.
+      </div>
+      <div class="daterow">
+        <div class="field">
+          <label>Von</label><input type="date" id="r-from" />
+        </div>
+        <div class="field">
+          <label>Bis</label><input type="date" id="r-to" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Art</label>
+        <div class="seg" id="r-seg">
+          <button data-type="urlaub" class="sel"
+            ><span class="ic">🏖️</span>Urlaub</button
           >
-            AltSource Hub ↗
-          </a>
-        </li>
-      </ul>
+          <button data-type="krank"><span class="ic">🤒</span>Krank</button>
+          <button data-type="frei"><span class="ic">📅</span>Freier Tag</button>
+          <button data-type="sonderurlaub"
+            ><span class="ic">⭐</span>Sonderurlaub</button
+          >
+        </div>
+      </div>
+      <div class="field">
+        <label>Kommentar (optional)</label><input
+          type="text"
+          id="r-note"
+          placeholder="z. B. Sommerurlaub"
+        />
+      </div>
+      <button class="btn btn-primary btn-sm" id="r-save">Eintragen</button>
+      <button class="btn btn-ghost btn-sm" id="r-cancel" style="margin-top:8px;"
+        >Abbrechen</button
+      >
     </div>
 
-    <div class="flex items-center">
-      <a
-        href="https://hub.bljeona.com"
-        class="hidden rounded-full border-2 border-ink bg-ink px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-paper transition-transform hover:-translate-y-0.5 sm:inline-block"
-      >
-        AltSource Hub ↗
-      </a>
+    <script is:inline>
+      "use strict";
+      var mem = {};
+      var store = {
+        get: function (k) {
+          try {
+            var v = localStorage.getItem(k);
+            return v === null ? (k in mem ? mem[k] : null) : v;
+          } catch (e) {
+            return k in mem ? mem[k] : null;
+          }
+        },
+        set: function (k, v) {
+          mem[k] = v;
+          try {
+            localStorage.setItem(k, v);
+          } catch (e) {}
+        },
+      };
+      function loadJSON(k, def) {
+        var v = store.get(k);
+        if (v === null) return def;
+        try {
+          return JSON.parse(v);
+        } catch (e) {
+          return def;
+        }
+      }
+      function saveJSON(k, o) {
+        store.set(k, JSON.stringify(o));
+      }
 
-      <label
-        for="portfolio-menu-toggle"
-        class="flex h-5 w-6 cursor-pointer flex-col justify-between text-ink sm:hidden"
-        aria-label="Toggle menu"
-      >
-        <span
-          class="h-0.5 w-full bg-current transition-all duration-300 origin-left"
-        ></span>
-        <span class="h-0.5 w-full bg-current transition-all duration-300"
-        ></span>
-        <span
-          class="h-0.5 w-full bg-current transition-all duration-300 origin-left"
-        ></span>
-      </label>
-    </div>
-  </nav>
-</header>
+      var settings = loadJSON("ze_settings", null);
+      var entries = loadJSON("ze_entries", {}); 
 
-<style>
-  #portfolio-menu-toggle:checked ~ div label span:nth-child(1) {
-    transform: rotate(45deg) translate(2px, -1px);
-  }
-  #portfolio-menu-toggle:checked ~ div label span:nth-child(2) {
-    opacity: 0;
-  }
-  #portfolio-menu-toggle:checked ~ div label span:nth-child(3) {
-    transform: rotate(-45deg) translate(2px, 1px);
-  }
-</style>
+      var WD_NAMES = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+      var TYPE_LABEL = {
+        arbeit: "Arbeit",
+        urlaub: "Urlaub",
+        krank: "Krank",
+        frei: "Freier Tag",
+        sonderurlaub: "Sonderurlaub",
+        feiertag: "Feiertag",
+      };
+      var TYPE_ICON = {
+        arbeit: "💼",
+        urlaub: "🏖️",
+        krank: "🤒",
+        frei: "📅",
+        sonderurlaub: "⭐",
+        feiertag: "🎉",
+      };
+
+      function pad(n) {
+        return (n < 10 ? "0" : "") + n;
+      }
+      function iso(d) {
+        return (
+          d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate())
+        );
+      }
+      function parseISO(s) {
+        var p = s.split("-");
+        return new Date(+p[0], +p[1] - 1, +p[2]);
+      }
+      function todayISO() {
+        return iso(new Date());
+      }
+      function isWeekend(d) {
+        var g = d.getDay();
+        return g === 0 || g === 6;
+      }
+
+      function easter(y) {
+        var a = y % 19,
+          b = Math.floor(y / 100),
+          c = y % 100,
+          d = Math.floor(b / 4),
+          e = b % 4,
+          f = Math.floor((b + 8) / 25),
+          g = Math.floor((b - f + 1) / 3),
+          h = (19 * a + b - d - g + 15) % 30,
+          i = Math.floor(c / 4),
+          k = c % 4,
+          l = (32 + 2 * e + 2 * i - h - k) % 7,
+          m = Math.floor((a + 11 * h + 22 * l) / 451),
+          mo = Math.floor((h + l - 7 * m + 114) / 31),
+          da = ((h + l - 7 * m + 114) % 31) + 1;
+        return new Date(y, mo - 1, da);
+      }
+      var holidayCache = {};
+      function holidaysFor(y) {
+        if (holidayCache[y]) return holidayCache[y];
+        var H = {},
+          E = easter(y);
+        function add(d, name) {
+          H[iso(d)] = name;
+        }
+        function off(days) {
+          var x = new Date(E);
+          x.setDate(x.getDate() + days);
+          return x;
+        }
+        add(new Date(y, 0, 1), "Neujahr");
+        add(new Date(y, 0, 6), "Heilige Drei Könige");
+        add(off(-2), "Karfreitag");
+        add(off(1), "Ostermontag");
+        add(new Date(y, 4, 1), "Tag der Arbeit");
+        add(off(39), "Christi Himmelfahrt");
+        add(off(50), "Pfingstmontag");
+        add(off(60), "Fronleichnam");
+        add(new Date(y, 7, 15), "Mariä Himmelfahrt");
+        add(new Date(y, 9, 3), "Tag der Deutschen Einheit");
+        add(new Date(y, 10, 1), "Allerheiligen");
+        add(new Date(y, 11, 25), "1. Weihnachtstag");
+        add(new Date(y, 11, 26), "2. Weihnachtstag");
+        holidayCache[y] = H;
+        return H;
+      }
+      function holidayName(s) {
+        var H = holidaysFor(parseISO(s).getFullYear());
+        return H[s] || null;
+      }
+
+      function workdayActive(d) {
+        var g = d.getDay();
+        var key = g === 0 ? 7 : g;
+        return settings.workdays.indexOf(key) !== -1;
+      }
+
+      function isLeave(t) {
+        return (
+          t === "urlaub" ||
+          t === "krank" ||
+          t === "frei" ||
+          t === "sonderurlaub"
+        );
+      }
+
+      function dayInfo(s) {
+        var d = parseISO(s),
+          hol = holidayName(s),
+          e = entries[s],
+          T = settings.target;
+        if (e) {
+          if (e.type === "arbeit") {
+            return {
+              delta: e.hours - T,
+              hours: e.hours,
+              label: "Arbeit",
+              kind: "arbeit",
+              note: e.note,
+            };
+          } else {
+            return {
+              delta: 0,
+              hours: T,
+              label: TYPE_LABEL[e.type],
+              kind: e.type,
+              note: e.note,
+            };
+          }
+        }
+        if (hol)
+          return { delta: 0, hours: T, label: hol, kind: "feiertag", note: "" };
+        if (isWeekend(d))
+          return {
+            delta: 0,
+            hours: 0,
+            label: "Wochenende",
+            kind: "weekend",
+            note: "",
+          };
+        if (!workdayActive(d))
+          return {
+            delta: 0,
+            hours: 0,
+            label: "Frei",
+            kind: "weekend",
+            note: "",
+          };
+
+        if (s < todayISO())
+          return {
+            delta: -T,
+            hours: 0,
+            label: "Nicht erfasst",
+            kind: "missing",
+            note: "",
+          };
+        return { delta: 0, hours: 0, label: "Offen", kind: "open", note: "" };
+      }
+
+      function totalBalance() {
+        if (!settings) return 0;
+        var start = settings.openingDate,
+          today = todayISO();
+        var bal = settings.openingBalance;
+        var d = parseISO(start),
+          end = parseISO(today);
+        while (d <= end) {
+          bal += dayInfo(iso(d)).delta;
+          d.setDate(d.getDate() + 1);
+        }
+        return bal;
+      }
+
+      function fmtH(n) {
+        var sign = n > 0 ? "+" : n < 0 ? "−" : "±";
+        var v = Math.abs(n)
+          .toFixed(2)
+          .replace(/\.?0+$/, "");
+        v = v.replace(".", ",");
+        return sign + v + " h";
+      }
+      function fmtHplain(n) {
+        var v = (Math.round(n * 100) / 100).toString().replace(".", ",");
+        return v;
+      }
+
+      var curMonth = new Date();
+      curMonth.setDate(1);
+
+      function renderBalance() {
+        var b = totalBalance();
+        var el = document.getElementById("balNum");
+        el.textContent = fmtH(b);
+        var pill = document.getElementById("balPill");
+        if (b > 0.001) {
+          pill.textContent = "🟢 " + fmtHplain(b) + " Stunden im Plus";
+        } else if (b < -0.001) {
+          pill.textContent =
+            "🔴 " + fmtHplain(Math.abs(b)) + " Stunden im Minus";
+        } else {
+          pill.textContent = "⚪ Ausgeglichen";
+        }
+        var g = document.getElementById("greeting");
+        var fn = (settings.firstName || "").trim();
+        g.textContent = fn ? "Hallo, " + fn + " 👋" : "";
+      }
+
+      function renderToday() {
+        var s = todayISO(),
+          d = parseISO(s);
+        document.getElementById("todayDate").textContent =
+          WD_NAMES[d.getDay()] +
+          ", " +
+          d.getDate() +
+          ". " +
+          [
+            "Januar",
+            "Februar",
+            "März",
+            "April",
+            "Mai",
+            "Juni",
+            "Juli",
+            "August",
+            "September",
+            "Oktober",
+            "November",
+            "Dezember",
+          ][d.getMonth()] +
+          " " +
+          d.getFullYear();
+
+        var hol = holidayName(s),
+          e = entries[s];
+        var banner = document.getElementById("autoBanner");
+        var workBlock = document.getElementById("workBlock");
+        var chip = document.getElementById("todayChip");
+        var clear = document.getElementById("clearDay");
+        banner.innerHTML = "";
+        workBlock.classList.remove("hidden");
+
+        document.querySelectorAll(".tbtn").forEach(function (b) {
+          b.classList.remove("sel");
+        });
+
+        if (hol) {
+          banner.innerHTML =
+            '<div class="status-banner holiday"><span class="ic">🎉</span><div><b>' +
+            hol +
+            '</b><br><span style="font-size:12.5px;opacity:.8;">Feiertag – zählt als ' +
+            fmtHplain(settings.target) +
+            " h, kein Eintrag nötig.</span></div></div>";
+          workBlock.classList.add("hidden");
+          chip.textContent = "Feiertag";
+        } else if (isWeekend(d) || !workdayActive(d)) {
+          banner.innerHTML =
+            '<div class="status-banner weekend"><span class="ic">🌙</span><div><b>Kein Arbeitstag</b><br><span style="font-size:12.5px;opacity:.8;">Zählt nicht in die Berechnung.</span></div></div>';
+          chip.textContent = "Frei";
+        } else {
+          chip.textContent = "Arbeit";
+        }
+
+        if (e) {
+          chip.textContent = TYPE_LABEL[e.type];
+          clear.classList.remove("hidden");
+          if (e.type === "arbeit") {
+            document.getElementById("hoursInput").value = e.hours;
+            document.getElementById("noteInput").value = e.note || "";
+          } else {
+            document.querySelectorAll(".tbtn").forEach(function (b) {
+              if (b.dataset.type === e.type) b.classList.add("sel");
+            });
+            document.getElementById("noteInput").value = e.note || "";
+          }
+        } else {
+          clear.classList.add("hidden");
+        }
+      }
+
+      function renderMonth() {
+        var y = curMonth.getFullYear(),
+          m = curMonth.getMonth();
+        document.getElementById("mLabel").textContent =
+          [
+            "Januar",
+            "Februar",
+            "März",
+            "April",
+            "Mai",
+            "Juni",
+            "Juli",
+            "August",
+            "September",
+            "Oktober",
+            "November",
+            "Dezember",
+          ][m] +
+          " " +
+          y;
+
+        var list = document.getElementById("dayList");
+        list.innerHTML = "";
+        var daysIn = new Date(y, m + 1, 0).getDate();
+        var sumHours = 0,
+          sumDelta = 0,
+          workedDays = 0;
+
+        for (var day = 1; day <= daysIn; day++) {
+          var d = new Date(y, m, day),
+            s = iso(d);
+          if (s < settings.openingDate) continue;
+          var info = dayInfo(s);
+          sumHours += info.hours;
+          sumDelta += info.delta;
+          if (info.kind === "arbeit" || isLeave(info.kind)) workedDays++;
+
+          var weak = info.kind === "weekend";
+          var row = document.createElement("div");
+          row.className = "dayrow" + (weak ? " wknd" : "");
+          row.dataset.date = s;
+
+          var dcls =
+            info.delta > 0.001 ? "pos" : info.delta < -0.001 ? "neg" : "zero";
+          var deltaTxt =
+            info.kind === "arbeit" || info.kind === "missing"
+              ? fmtH(info.delta)
+              : "";
+          if (info.kind === "feiertag")
+            deltaTxt = '<span class="tag h">Feiertag</span>';
+
+          var label = info.label;
+          if (info.kind === "arbeit")
+            label = fmtHplain(info.hours) + " h gearbeitet";
+          else if (isLeave(info.kind))
+            label = TYPE_ICON[info.kind] + " " + TYPE_LABEL[info.kind];
+
+          row.innerHTML =
+            '<div class="date"><div class="d tnum">' +
+            day +
+            '</div><div class="w">' +
+            WD_NAMES[d.getDay()] +
+            "</div></div>" +
+            '<div class="mid"><div class="t">' +
+            label +
+            "</div>" +
+            (info.note
+              ? '<div class="nt">' + escapeHtml(info.note) + "</div>"
+              : "") +
+            "</div>" +
+            '<div class="delta ' +
+            dcls +
+            '">' +
+            deltaTxt +
+            "</div>";
+          if (!weak || entries[s]) {
+            row.addEventListener("click", function () {
+              openDay(this.dataset.date);
+            });
+          }
+          list.appendChild(row);
+        }
+        document.getElementById("mHours").textContent = fmtHplain(sumHours);
+        var md = document.getElementById("mDelta");
+        md.textContent = fmtH(sumDelta);
+        md.className =
+          "n tnum " +
+          (sumDelta > 0.001 ? "pos" : sumDelta < -0.001 ? "neg" : "zero");
+        document.getElementById("mDays").textContent = workedDays;
+      }
+
+      function escapeHtml(t) {
+        return String(t).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+
+      var editingDate = todayISO();
+      function openDay(s) {
+        editingDate = s;
+        switchView("heute", true);
+        document.getElementById("backBtn").classList.remove("hidden");
+      }
+      function renderTodayFor(s) {
+        var d = parseISO(s),
+          e = entries[s],
+          hol = holidayName(s);
+        document.getElementById("todayTitle").textContent =
+          s === todayISO() ? "Heute" : "Tag bearbeiten";
+        document.getElementById("todayDate").textContent =
+          WD_NAMES[d.getDay()] +
+          ", " +
+          d.getDate() +
+          ". " +
+          [
+            "Januar",
+            "Februar",
+            "März",
+            "April",
+            "Mai",
+            "Juni",
+            "Juli",
+            "August",
+            "September",
+            "Oktober",
+            "November",
+            "Dezember",
+          ][d.getMonth()] +
+          " " +
+          d.getFullYear();
+        var banner = document.getElementById("autoBanner"),
+          workBlock = document.getElementById("workBlock"),
+          typeSection = document.getElementById("typeSection"),
+          leaveBox = document.getElementById("leaveConfirm"),
+          chip = document.getElementById("todayChip"),
+          clear = document.getElementById("clearDay");
+        banner.innerHTML = "";
+        leaveBox.innerHTML = "";
+        workBlock.classList.remove("hidden");
+        typeSection.classList.remove("hidden");
+        leaveBox.classList.add("hidden");
+        clear.classList.add("hidden");
+        document.querySelectorAll(".tbtn").forEach(function (b) {
+          b.classList.remove("sel");
+        });
+        document.getElementById("hoursInput").value =
+          e && e.type === "arbeit" ? e.hours : settings.target;
+        document.getElementById("noteInput").value =
+          e && e.type === "arbeit" ? e.note || "" : "";
+
+        if (e && isLeave(e.type)) {
+          chip.textContent = TYPE_LABEL[e.type];
+          workBlock.classList.add("hidden");
+          typeSection.classList.add("hidden");
+          leaveBox.classList.remove("hidden");
+          leaveBox.innerHTML =
+            '<div class="leave-done"><div class="big">' +
+            TYPE_ICON[e.type] +
+            "</div>" +
+            '<div class="lt">' +
+            TYPE_LABEL[e.type] +
+            "</div>" +
+            '<div class="sm">' +
+            fmtHplain(settings.target) +
+            " h gutgeschrieben · zählt als voller Tag</div>" +
+            (e.note
+              ? '<div class="sm" style="margin-top:6px;">„' +
+                escapeHtml(e.note) +
+                '"</div>'
+              : "") +
+            '<div class="acts"><button class="btn btn-ghost btn-sm" id="leaveToWork">Als Arbeit erfassen</button>' +
+            '<button class="btn btn-ghost btn-sm" id="leaveDel" style="color:var(--red);">Löschen</button></div></div>';
+          document
+            .getElementById("leaveToWork")
+            .addEventListener("click", function () {
+              delete entries[s];
+              saveJSON("ze_entries", entries);
+              refresh();
+            });
+          document
+            .getElementById("leaveDel")
+            .addEventListener("click", clearDay);
+          return;
+        }
+
+        if (hol) {
+          banner.innerHTML =
+            '<div class="status-banner holiday"><span class="ic">🎉</span><div><b>' +
+            hol +
+            '</b><br><span style="font-size:12.5px;opacity:.8;">Feiertag – zählt als ' +
+            fmtHplain(settings.target) +
+            " h, kein Eintrag nötig.</span></div></div>";
+          workBlock.classList.add("hidden");
+          typeSection.classList.add("hidden");
+          chip.textContent = "Feiertag";
+          return;
+        }
+
+        if (isWeekend(d) || !workdayActive(d)) {
+          banner.innerHTML =
+            '<div class="status-banner weekend"><span class="ic">🌙</span><div><b>Kein Arbeitstag</b><br><span style="font-size:12.5px;opacity:.8;">Zählt nicht in die Berechnung.</span></div></div>';
+          chip.textContent = "Frei";
+        } else chip.textContent = "Arbeit";
+
+        if (e && e.type === "arbeit") {
+          chip.textContent = "Arbeit";
+          clear.classList.remove("hidden");
+        }
+      }
+
+      function toast(msg) {
+        var t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(t._t);
+        t._t = setTimeout(function () {
+          t.classList.remove("show");
+        }, 1800);
+      }
+
+      function saveWork() {
+        var h = parseFloat(document.getElementById("hoursInput").value);
+        if (isNaN(h) || h < 0) {
+          toast("Bitte gültige Stunden eingeben");
+          return;
+        }
+        entries[editingDate] = {
+          type: "arbeit",
+          hours: Math.round(h * 100) / 100,
+          note: document.getElementById("noteInput").value.trim(),
+        };
+        saveJSON("ze_entries", entries);
+        toast("Gespeichert ✓");
+        refresh();
+      }
+      function saveLeave(type) {
+        entries[editingDate] = {
+          type: type,
+          hours: settings.target,
+          note: document.getElementById("noteInput").value.trim(),
+        };
+        saveJSON("ze_entries", entries);
+        toast(TYPE_LABEL[type] + " eingetragen ✓");
+        refresh();
+      }
+      function clearDay() {
+        delete entries[editingDate];
+        saveJSON("ze_entries", entries);
+        toast("Eintrag gelöscht");
+        refresh();
+      }
+
+      function refresh() {
+        renderBalance();
+        if (document.getElementById("view-heute").classList.contains("active"))
+          renderTodayFor(editingDate);
+        if (document.getElementById("view-monat").classList.contains("active"))
+          renderMonth();
+      }
+
+      function switchView(name, keepDay) {
+        document.querySelectorAll(".view").forEach(function (v) {
+          v.classList.remove("active");
+        });
+        document.getElementById("view-" + name).classList.add("active");
+        document.querySelectorAll("nav.bottom button").forEach(function (b) {
+          b.classList.toggle("on", b.dataset.view === name);
+        });
+        if (name === "heute") {
+          if (!keepDay) {
+            editingDate = todayISO();
+            document.getElementById("todayTitle").textContent = "Heute";
+            document.getElementById("backBtn").classList.add("hidden");
+          }
+          renderTodayFor(editingDate);
+        }
+        if (name === "monat") renderMonth();
+        if (name === "mehr") fillSettings();
+        window.scrollTo(0, 0);
+      }
+
+      function buildWdays(containerId, selected) {
+        var c = document.getElementById(containerId);
+        c.innerHTML = "";
+        var labels = [
+          ["Mo", 1],
+          ["Di", 2],
+          ["Mi", 3],
+          ["Do", 4],
+          ["Fr", 5],
+          ["Sa", 6],
+          ["So", 7],
+        ];
+        labels.forEach(function (p) {
+          var b = document.createElement("button");
+          b.className = "wd" + (selected.indexOf(p[1]) !== -1 ? " on" : "");
+          b.textContent = p[0];
+          b.dataset.wd = p[1];
+          b.addEventListener("click", function () {
+            this.classList.toggle("on");
+          });
+          c.appendChild(b);
+        });
+      }
+      function readWdays(containerId) {
+        var arr = [];
+        document
+          .querySelectorAll("#" + containerId + " .wd.on")
+          .forEach(function (b) {
+            arr.push(+b.dataset.wd);
+          });
+        return arr;
+      }
+      function fillSettings() {
+        document.getElementById("se-first").value = settings.firstName || "";
+        document.getElementById("se-last").value = settings.lastName || "";
+        document.getElementById("se-target").value = settings.target;
+        document.getElementById("se-date").value = settings.openingDate;
+        document.getElementById("se-bal").value = settings.openingBalance;
+        buildWdays("se-wdays", settings.workdays);
+      }
+      function saveSettings() {
+        var t = parseFloat(document.getElementById("se-target").value);
+        var wd = readWdays("se-wdays");
+        var od = document.getElementById("se-date").value;
+        var ob = parseFloat(document.getElementById("se-bal").value);
+        if (isNaN(t) || t <= 0) {
+          toast("Sollstunden ungültig");
+          return;
+        }
+        if (!wd.length) {
+          toast("Mind. ein Arbeitstag");
+          return;
+        }
+        if (!od) {
+          toast("Startdatum fehlt");
+          return;
+        }
+        settings.firstName = document.getElementById("se-first").value.trim();
+        settings.lastName = document.getElementById("se-last").value.trim();
+        settings.target = t;
+        settings.workdays = wd;
+        settings.openingDate = od;
+        settings.openingBalance = isNaN(ob) ? 0 : ob;
+        saveJSON("ze_settings", settings);
+        toast("Gespeichert ✓");
+        renderBalance();
+      }
+
+      var crcTable = (function () {
+        var t = [];
+        for (var n = 0; n < 256; n++) {
+          var c = n;
+          for (var k = 0; k < 8; k++)
+            c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+          t[n] = c >>> 0;
+        }
+        return t;
+      })();
+      function crc32(bytes) {
+        var c = 0xffffffff;
+        for (var i = 0; i < bytes.length; i++)
+          c = crcTable[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+        return (c ^ 0xffffffff) >>> 0;
+      }
+      function strBytes(s) {
+        var u = unescape(encodeURIComponent(s)),
+          a = new Uint8Array(u.length);
+        for (var i = 0; i < u.length; i++) a[i] = u.charCodeAt(i);
+        return a;
+      }
+
+      function zip(files) {
+        var parts = [],
+          central = [],
+          offset = 0;
+        function u16(n) {
+          return new Uint8Array([n & 255, (n >> 8) & 255]);
+        }
+        function u32(n) {
+          return new Uint8Array([
+            n & 255,
+            (n >> 8) & 255,
+            (n >> 16) & 255,
+            (n >> 24) & 255,
+          ]);
+        }
+        function cat() {
+          var len = 0,
+            i;
+          for (i = 0; i < arguments.length; i++) len += arguments[i].length;
+          var o = new Uint8Array(len),
+            p = 0;
+          for (i = 0; i < arguments.length; i++) {
+            o.set(arguments[i], p);
+            p += arguments[i].length;
+          }
+          return o;
+        }
+        files.forEach(function (f) {
+          var name = strBytes(f.name),
+            data = f.data,
+            crc = crc32(data);
+          var lh = cat(
+            u32(0x04034b50),
+            u16(20),
+            u16(0),
+            u16(0),
+            u16(0),
+            u16(0),
+            u32(crc),
+            u32(data.length),
+            u32(data.length),
+            u16(name.length),
+            u16(0),
+            name,
+          );
+          parts.push(lh, data);
+          var ch = cat(
+            u32(0x02014b50),
+            u16(20),
+            u16(20),
+            u16(0),
+            u16(0),
+            u16(0),
+            u16(0),
+            u32(crc),
+            u32(data.length),
+            u32(data.length),
+            u16(name.length),
+            u16(0),
+            u16(0),
+            u16(0),
+            u16(0),
+            u32(0),
+            u32(offset),
+            name,
+          );
+          central.push(ch);
+          offset += lh.length + data.length;
+        });
+        var cd = cat.apply(null, central);
+        var eo = cat(
+          u32(0x06054b50),
+          u16(0),
+          u16(0),
+          u16(files.length),
+          u16(files.length),
+          u32(cd.length),
+          u32(offset),
+          u16(0),
+        );
+        return cat(cat.apply(null, parts), cd, eo);
+      }
+
+      function colLetter(i) {
+        var s = "";
+        i++;
+        while (i > 0) {
+          var m = (i - 1) % 26;
+          s = String.fromCharCode(65 + m) + s;
+          i = Math.floor((i - 1) / 26);
+        }
+        return s;
+      }
+      function xmlEsc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&apos;",
+          }[c];
+        });
+      }
+
+      function sheetXml(rows) {
+        var x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+        x +=
+          '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+        rows.forEach(function (row, r) {
+          x += '<row r="' + (r + 1) + '">';
+          row.forEach(function (cell, c) {
+            var ref = colLetter(c) + (r + 1);
+            if (typeof cell === "number" && !isNaN(cell)) {
+              x += '<c r="' + ref + '"><v>' + cell + "</v></c>";
+            } else {
+              x +=
+                '<c r="' +
+                ref +
+                '" t="inlineStr"><is><t xml:space="preserve">' +
+                xmlEsc(cell) +
+                "</t></is></c>";
+            }
+          });
+          x += "</row>";
+        });
+        x += "</sheetData></worksheet>";
+        return x;
+      }
+
+      function buildWorkbook(sheets) {
+        var files = [];
+        var types =
+          '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+          '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+          '<Default Extension="xml" ContentType="application/xml"/>' +
+          '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>';
+        sheets.forEach(function (s, i) {
+          types +=
+            '<Override PartName="/xl/worksheets/sheet' +
+            (i + 1) +
+            '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
+        });
+        types += "</Types>";
+        files.push({ name: "[Content_Types].xml", data: strBytes(types) });
+
+        files.push({
+          name: "_rels/.rels",
+          data: strBytes(
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+          ),
+        });
+
+        var wb =
+          '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>';
+        var rels =
+          '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">';
+        sheets.forEach(function (s, i) {
+          wb +=
+            '<sheet name="' +
+            xmlEsc(s.name) +
+            '" sheetId="' +
+            (i + 1) +
+            '" r:id="rId' +
+            (i + 1) +
+            '"/>';
+          rels +=
+            '<Relationship Id="rId' +
+            (i + 1) +
+            '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' +
+            (i + 1) +
+            '.xml"/>';
+          files.push({
+            name: "xl/worksheets/sheet" + (i + 1) + ".xml",
+            data: strBytes(sheetXml(s.rows)),
+          });
+        });
+        wb += "</sheets></workbook>";
+        rels += "</Relationships>";
+        files.push({ name: "xl/workbook.xml", data: strBytes(wb) });
+        files.push({
+          name: "xl/_rels/workbook.xml.rels",
+          data: strBytes(rels),
+        });
+        return zip(files);
+      }
+
+      function germanDate(s) {
+        var d = parseISO(s);
+        return (
+          pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear()
+        );
+      }
+
+      function exportExcel() {
+        var start = settings.openingDate,
+          today = todayISO();
+        var arbeit = [
+          [
+            "Datum",
+            "Wochentag",
+            "Stunden",
+            "Saldo",
+            "Saldo kumuliert",
+            "Notiz",
+          ],
+        ];
+        var urlaub = [["Datum", "Wochentag", "Stunden", "Notiz"]];
+        var krank = [["Datum", "Wochentag", "Stunden", "Notiz"]];
+        var frei = [["Datum", "Wochentag", "Stunden", "Notiz"]];
+        var sonder = [["Datum", "Wochentag", "Stunden", "Notiz"]];
+        var feier = [["Datum", "Wochentag", "Feiertag", "Stunden"]];
+        var run = settings.openingBalance,
+          totalH = 0;
+
+        var d = parseISO(start),
+          end = parseISO(today);
+        while (d <= end) {
+          var s = iso(d),
+            wn = WD_NAMES[d.getDay()],
+            e = entries[s],
+            hol = holidayName(s),
+            info = dayInfo(s);
+          run += info.delta;
+          if (e) {
+            if (e.type === "arbeit") {
+              arbeit.push([
+                germanDate(s),
+                wn,
+                e.hours,
+                Math.round((e.hours - settings.target) * 100) / 100,
+                Math.round(run * 100) / 100,
+                e.note || "",
+              ]);
+              totalH += e.hours;
+            } else if (e.type === "urlaub") {
+              urlaub.push([germanDate(s), wn, settings.target, e.note || ""]);
+              totalH += settings.target;
+            } else if (e.type === "krank") {
+              krank.push([germanDate(s), wn, settings.target, e.note || ""]);
+              totalH += settings.target;
+            } else if (e.type === "frei") {
+              frei.push([germanDate(s), wn, settings.target, e.note || ""]);
+              totalH += settings.target;
+            } else if (e.type === "sonderurlaub") {
+              sonder.push([germanDate(s), wn, settings.target, e.note || ""]);
+              totalH += settings.target;
+            }
+          } else if (hol) {
+            feier.push([germanDate(s), wn, hol, settings.target]);
+            totalH += settings.target;
+          } else if (info.kind === "missing") {
+            arbeit.push([
+              germanDate(s),
+              wn,
+              0,
+              Math.round(-settings.target * 100) / 100,
+              Math.round(run * 100) / 100,
+              "– nicht erfasst –",
+            ]);
+          }
+          d.setDate(d.getDate() + 1);
+        }
+
+        var fullName = (
+          (settings.firstName || "") +
+          " " +
+          (settings.lastName || "")
+        ).trim();
+        var zus = [
+          ["Zeiterfassung – Zusammenfassung"],
+          [""],
+          ["Mitarbeiter/in", fullName || "–"],
+          ["Zeitraum", germanDate(start) + " – " + germanDate(today)],
+          ["Sollstunden / Tag", settings.target],
+          ["Anfangssaldo", settings.openingBalance],
+          [""],
+          ["Summe erfasste Stunden", Math.round(totalH * 100) / 100],
+          ["Aktueller Saldo (+/−)", Math.round(totalBalance() * 100) / 100],
+          [""],
+          ["Urlaubstage", urlaub.length - 1],
+          ["Krankheitstage", krank.length - 1],
+          ["Freie Tage", frei.length - 1],
+          ["Sonderurlaubstage", sonder.length - 1],
+          ["Feiertage", feier.length - 1],
+        ];
+
+        var blob = new Blob(
+          [
+            buildWorkbook([
+              { name: "Zusammenfassung", rows: zus },
+              { name: "Arbeitszeit", rows: arbeit },
+              { name: "Urlaub", rows: urlaub },
+              { name: "Krankheit", rows: krank },
+              { name: "Freie Tage", rows: frei },
+              { name: "Sonderurlaub", rows: sonder },
+              { name: "Feiertage", rows: feier },
+            ]),
+          ],
+          {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+        );
+
+        var url = URL.createObjectURL(blob),
+          a = document.createElement("a");
+        var nameSlug = fullName ? "_" + fullName.replace(/\s+/g, "_") : "";
+        a.href = url;
+        a.download = "Zeiterfassung" + nameSlug + "_" + today + ".xlsx";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () {
+          URL.revokeObjectURL(url);
+        }, 2000);
+        toast("Excel erstellt ✓");
+      }
+
+      function startApp() {
+        document.getElementById("setup").classList.remove("show");
+        document.getElementById("app").classList.remove("hidden");
+        renderBalance();
+        switchView("heute");
+      }
+
+      function initEvents() {
+        document.getElementById("plus").addEventListener("click", function () {
+          var i = document.getElementById("hoursInput");
+          i.value = (parseFloat(i.value) || 0) + 0.5;
+        });
+        document.getElementById("minus").addEventListener("click", function () {
+          var i = document.getElementById("hoursInput");
+          i.value = Math.max(0, (parseFloat(i.value) || 0) - 0.5);
+        });
+        document.getElementById("saveWork").addEventListener("click", saveWork);
+        document.getElementById("clearDay").addEventListener("click", clearDay);
+        document.querySelectorAll(".tbtn").forEach(function (b) {
+          b.addEventListener("click", function () {
+            saveLeave(this.dataset.type);
+          });
+        });
+
+        document.querySelectorAll("nav.bottom button").forEach(function (b) {
+          b.addEventListener("click", function () {
+            switchView(this.dataset.view);
+          });
+        });
+        document
+          .getElementById("backBtn")
+          .addEventListener("click", function () {
+            switchView("monat");
+          });
+
+        document.getElementById("mPrev").addEventListener("click", function () {
+          curMonth.setMonth(curMonth.getMonth() - 1);
+          renderMonth();
+        });
+        document.getElementById("mNext").addEventListener("click", function () {
+          curMonth.setMonth(curMonth.getMonth() + 1);
+          renderMonth();
+        });
+
+        document
+          .getElementById("se-save")
+          .addEventListener("click", saveSettings);
+        document
+          .getElementById("exportBtn")
+          .addEventListener("click", exportExcel);
+        document
+          .getElementById("resetBtn")
+          .addEventListener("click", function () {
+            if (confirm("Wirklich ALLE Daten und Einstellungen löschen?")) {
+              store.set("ze_settings", "null");
+              store.set("ze_entries", "{}");
+              mem = {};
+              location.reload();
+            }
+          });
+
+        document
+          .getElementById("openRange")
+          .addEventListener("click", openRange);
+        document
+          .getElementById("r-cancel")
+          .addEventListener("click", closeRange);
+        document
+          .getElementById("sheetBg")
+          .addEventListener("click", closeRange);
+        document.getElementById("r-save").addEventListener("click", saveRange);
+        document.querySelectorAll("#r-seg button").forEach(function (b) {
+          b.addEventListener("click", function () {
+            document.querySelectorAll("#r-seg button").forEach(function (x) {
+              x.classList.remove("sel");
+            });
+            this.classList.add("sel");
+          });
+        });
+
+        buildWdays("su-wdays", [1, 2, 3, 4, 5]);
+        document.getElementById("su-date").value = todayISO();
+        document.getElementById("su-go").addEventListener("click", function () {
+          var t = parseFloat(document.getElementById("su-target").value) || 8;
+          var wd = readWdays("su-wdays");
+          if (!wd.length) wd = [1, 2, 3, 4, 5];
+          var od = document.getElementById("su-date").value || todayISO();
+          var ob = parseFloat(document.getElementById("su-bal").value) || 0;
+          settings = {
+            firstName: document.getElementById("su-first").value.trim(),
+            lastName: document.getElementById("su-last").value.trim(),
+            target: t,
+            workdays: wd,
+            openingDate: od,
+            openingBalance: ob,
+          };
+          saveJSON("ze_settings", settings);
+          startApp();
+        });
+      }
+
+      function openRange() {
+        var t = todayISO();
+        document.getElementById("r-from").value = t;
+        document.getElementById("r-to").value = t;
+        document.getElementById("r-note").value = "";
+        document.querySelectorAll("#r-seg button").forEach(function (x) {
+          x.classList.remove("sel");
+        });
+        document
+          .querySelector('#r-seg button[data-type="urlaub"]')
+          .classList.add("sel");
+        document.getElementById("sheetBg").classList.add("show");
+        document.getElementById("rangeSheet").classList.add("show");
+      }
+      function closeRange() {
+        document.getElementById("sheetBg").classList.remove("show");
+        document.getElementById("rangeSheet").classList.remove("show");
+      }
+      function saveRange() {
+        var from = document.getElementById("r-from").value,
+          to = document.getElementById("r-to").value;
+        var type = document.querySelector("#r-seg button.sel").dataset.type;
+        var note = document.getElementById("r-note").value.trim();
+        if (!from || !to) {
+          toast("Bitte Von und Bis wählen");
+          return;
+        }
+        if (from > to) {
+          var tmp = from;
+          from = to;
+          to = tmp;
+        }
+        var d = parseISO(from),
+          end = parseISO(to),
+          count = 0,
+          skipped = 0;
+        while (d <= end) {
+          var s = iso(d);
+          if (isWeekend(d) || holidayName(s) || !workdayActive(d)) {
+            skipped++;
+          } else {
+            entries[s] = { type: type, hours: settings.target, note: note };
+            count++;
+          }
+          d.setDate(d.getDate() + 1);
+        }
+        saveJSON("ze_entries", entries);
+        closeRange();
+        refresh();
+        toast(
+          count +
+            " " +
+            (count === 1 ? "Tag" : "Tage") +
+            " als " +
+            TYPE_LABEL[type] +
+            " eingetragen ✓",
+        );
+      }
+
+      initEvents();
+      if (settings) {
+        startApp();
+      } else {
+        document.getElementById("setup").classList.add("show");
+      }
+    </script>
+  </body>
+</html>
