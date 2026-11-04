@@ -508,7 +508,8 @@
       }
       .field input[type="number"],
       .field input[type="date"],
-      .field input[type="text"] {
+      .field input[type="text"],
+      .field select {
         width: 100%;
         border: 1.5px solid var(--line);
         border-radius: 13px;
@@ -1004,6 +1005,10 @@
             <div class="sub">
               Erstellt eine Excel-Datei (.xlsx) mit getrennten Tabellen – bereit
               zum Senden an den Arbeitgeber.
+            </div>
+            <div class="field" style="margin-bottom:12px;">
+              <label>Zeitraum</label>
+              <select id="exportRange"></select>
             </div>
             <button class="btn btn-primary btn-sm" id="exportBtn"
               >📊 Excel exportieren</button
@@ -1710,6 +1715,41 @@
         document.getElementById("se-date").value = settings.openingDate;
         document.getElementById("se-bal").value = settings.openingBalance;
         buildWdays("se-wdays", settings.workdays);
+        fillExportRange();
+      }
+
+      var MONTH_NAMES = [
+        "Januar", "Februar", "März", "April", "Mai", "Juni",
+        "Juli", "August", "September", "Oktober", "November", "Dezember",
+      ];
+      // Fills the export dropdown: every month since the start date (newest first) + "all".
+      function fillExportRange() {
+        var sel = document.getElementById("exportRange");
+        var prev = sel.value;
+        sel.innerHTML = "";
+        var startD = parseISO(settings.openingDate),
+          now = new Date();
+        var y = now.getFullYear(),
+          m = now.getMonth();
+        var sy = startD.getFullYear(),
+          sm = startD.getMonth();
+        while (y > sy || (y === sy && m >= sm)) {
+          var o = document.createElement("option");
+          o.value = y + "-" + pad(m + 1);
+          o.textContent = MONTH_NAMES[m] + " " + y;
+          sel.appendChild(o);
+          m--;
+          if (m < 0) {
+            m = 11;
+            y--;
+          }
+        }
+        var all = document.createElement("option");
+        all.value = "all";
+        all.textContent = "Gesamter Zeitraum (alle Monate)";
+        sel.appendChild(all);
+        if (prev && sel.querySelector('option[value="' + prev + '"]'))
+          sel.value = prev;
       }
       function saveSettings() {
         var t = parseFloat(document.getElementById("se-target").value);
@@ -1959,6 +1999,20 @@
       function exportExcel() {
         var start = settings.openingDate,
           today = todayISO();
+        var rangeVal = document.getElementById("exportRange").value || "all";
+        var from = start,
+          to = today;
+        if (rangeVal !== "all") {
+          var rp = rangeVal.split("-");
+          var mFirst = rangeVal + "-01";
+          var mLast = iso(new Date(+rp[0], +rp[1], 0));
+          from = mFirst > start ? mFirst : start;
+          to = mLast < today ? mLast : today;
+        }
+        if (from > to) {
+          toast("Keine Daten in diesem Zeitraum");
+          return;
+        }
         var arbeit = [
           [
             "Datum",
@@ -1975,17 +2029,21 @@
         var sonder = [["Datum", "Wochentag", "Stunden", "Notiz"]];
         var feier = [["Datum", "Wochentag", "Feiertag", "Stunden"]];
         var run = settings.openingBalance,
-          totalH = 0;
+          totalH = 0,
+          rangeDelta = 0;
 
-        var d = parseISO(start),
-          end = parseISO(today);
-        while (d <= end) {
+        // Always walk from the start date so the cumulative balance stays correct,
+        // but only list days inside the chosen period.
+        var end = parseISO(to);
+        for (var d = parseISO(start); d <= end; d.setDate(d.getDate() + 1)) {
           var s = iso(d),
             wn = WD_NAMES[d.getDay()],
             e = entries[s],
             hol = holidayName(s),
             info = dayInfo(s);
           run += info.delta;
+          if (s < from) continue;
+          rangeDelta += info.delta;
           if (e) {
             if (e.type === "arbeit") {
               arbeit.push([
@@ -2023,8 +2081,11 @@
               "– nicht erfasst –",
             ]);
           }
-          d.setDate(d.getDate() + 1);
         }
+        var r2 = function (n) {
+          return Math.round(n * 100) / 100;
+        };
+        var carry = run - rangeDelta;
 
         var fullName = (
           (settings.firstName || "") +
@@ -2035,12 +2096,14 @@
           ["Zeiterfassung – Zusammenfassung"],
           [""],
           ["Mitarbeiter/in", fullName || "–"],
-          ["Zeitraum", germanDate(start) + " – " + germanDate(today)],
+          ["Zeitraum", germanDate(from) + " – " + germanDate(to)],
           ["Sollstunden / Tag", settings.target],
-          ["Anfangssaldo", settings.openingBalance],
+          ["Saldo zu Beginn (Übertrag)", r2(carry)],
           [""],
-          ["Summe erfasste Stunden", Math.round(totalH * 100) / 100],
-          ["Aktueller Saldo (+/−)", Math.round(totalBalance() * 100) / 100],
+          ["Summe erfasste Stunden", r2(totalH)],
+          ["Saldo im Zeitraum (+/−)", r2(rangeDelta)],
+          ["Saldo am Ende des Zeitraums", r2(run)],
+          ["Aktueller Gesamtsaldo (heute)", r2(totalBalance())],
           [""],
           ["Urlaubstage", urlaub.length - 1],
           ["Krankheitstage", krank.length - 1],
@@ -2070,7 +2133,12 @@
           a = document.createElement("a");
         var nameSlug = fullName ? "_" + fullName.replace(/\s+/g, "_") : "";
         a.href = url;
-        a.download = "Zeiterfassung" + nameSlug + "_" + today + ".xlsx";
+        a.download =
+          "Zeiterfassung" +
+          nameSlug +
+          "_" +
+          (rangeVal === "all" ? today : rangeVal) +
+          ".xlsx";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
