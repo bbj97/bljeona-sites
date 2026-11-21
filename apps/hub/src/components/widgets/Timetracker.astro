@@ -1212,6 +1212,11 @@
         return settings.workdays.indexOf(key) !== -1;
       }
 
+      function isRegularWorkday(s) {
+        var d = parseISO(s);
+        return !holidayName(s) && !isWeekend(d) && workdayActive(d);
+      }
+
       function isLeave(t) {
         return (
           t === "urlaub" ||
@@ -1228,8 +1233,11 @@
           T = settings.target;
         if (e) {
           if (e.type === "arbeit") {
+            // On weekends, non-workdays and holidays there is no target:
+            // every hour worked counts fully as overtime.
+            var regular = isRegularWorkday(s);
             return {
-              delta: e.hours - T,
+              delta: regular ? e.hours - T : e.hours,
               hours: e.hours,
               label: "Arbeit",
               kind: "arbeit",
@@ -1470,11 +1478,9 @@
             '">' +
             deltaTxt +
             "</div>";
-          if (!weak || entries[s]) {
-            row.addEventListener("click", function () {
-              openDay(this.dataset.date);
-            });
-          }
+          row.addEventListener("click", function () {
+            openDay(this.dataset.date);
+          });
           list.appendChild(row);
         }
         document.getElementById("mHours").textContent = fmtHplain(sumHours);
@@ -1541,7 +1547,11 @@
           b.classList.remove("sel");
         });
         document.getElementById("hoursInput").value =
-          e && e.type === "arbeit" ? e.hours : settings.target;
+          e && e.type === "arbeit"
+            ? e.hours
+            : isRegularWorkday(s)
+              ? settings.target
+              : 0;
         document.getElementById("noteInput").value =
           e && e.type === "arbeit" ? e.note || "" : "";
 
@@ -1586,16 +1596,13 @@
             hol +
             '</b><br><span style="font-size:12.5px;opacity:.8;">Feiertag – zählt als ' +
             fmtHplain(settings.target) +
-            " h, kein Eintrag nötig.</span></div></div>";
-          workBlock.classList.add("hidden");
+            " h, kein Eintrag nötig. Falls du gearbeitet hast, trag die Stunden ein – sie zählen komplett als Überstunden.</span></div></div>";
           typeSection.classList.add("hidden");
           chip.textContent = "Feiertag";
-          return;
-        }
-
-        if (isWeekend(d) || !workdayActive(d)) {
+        } else if (isWeekend(d) || !workdayActive(d)) {
           banner.innerHTML =
-            '<div class="status-banner weekend"><span class="ic">🌙</span><div><b>Kein Arbeitstag</b><br><span style="font-size:12.5px;opacity:.8;">Zählt nicht in die Berechnung.</span></div></div>';
+            '<div class="status-banner weekend"><span class="ic">🌙</span><div><b>Kein regulärer Arbeitstag</b><br><span style="font-size:12.5px;opacity:.8;">Falls du gearbeitet hast, trag die Stunden ein – sie zählen komplett als Überstunden.</span></div></div>';
+          typeSection.classList.add("hidden");
           chip.textContent = "Frei";
         } else chip.textContent = "Arbeit";
 
@@ -2050,11 +2057,15 @@
                 germanDate(s),
                 wn,
                 e.hours,
-                Math.round((e.hours - settings.target) * 100) / 100,
+                Math.round(info.delta * 100) / 100,
                 Math.round(run * 100) / 100,
                 e.note || "",
               ]);
               totalH += e.hours;
+              if (hol) {
+                feier.push([germanDate(s), wn, hol, settings.target]);
+                totalH += settings.target;
+              }
             } else if (e.type === "urlaub") {
               urlaub.push([germanDate(s), wn, settings.target, e.note || ""]);
               totalH += settings.target;
