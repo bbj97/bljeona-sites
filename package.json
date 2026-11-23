@@ -10,6 +10,7 @@
     "dev:hub": "npm run dev -w apps/hub"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^2.0.0",
     "html-to-image": "^1.11.13"
   }
 }
